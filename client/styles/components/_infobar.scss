@@ -1,0 +1,14 @@
+.info {
+   display: flex;
+   align-items: center;
+   font-size: 2rem;
+   padding: 1rem 0;
+
+   &__pieces {
+      margin-left: auto;
+   }
+
+   &__time {
+      font-size: 3rem;
+   }
+}

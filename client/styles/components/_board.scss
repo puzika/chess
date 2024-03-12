@@ -1,0 +1,24 @@
+.board {
+   display: grid;
+   width: 100%;
+   grid-template-rows: repeat(8, 1fr);
+   grid-template-columns: repeat(8, 1fr);
+
+   &__cell {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      &--white {
+         background-color: var(--color-cell-white);
+      }
+
+      &--black {
+         background-color: var(--color-cell-black);
+      }
+   }
+
+   &__image {
+      width: 100%;
+   }
+}

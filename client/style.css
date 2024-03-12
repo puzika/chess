@@ -1,3 +1,64 @@
+:root {
+  --color-cell-white: #F0DAB5;
+  --color-cell-black: #B58763;
+  --color-background: #ECEBE7;
+}
 
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: inherit;
+}
+
+html {
+  font-size: 62.5%;
+  box-sizing: border-box;
+}
+
+body {
+  font-size: 1.6rem;
+  background-color: var(--color-background);
+}
+
+.game {
+  margin: 0 auto;
+  max-width: 40%;
+}
+
+.board {
+  display: grid;
+  width: 100%;
+  grid-template-rows: repeat(8, 1fr);
+  grid-template-columns: repeat(8, 1fr);
+}
+.board__cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.board__cell--white {
+  background-color: var(--color-cell-white);
+}
+.board__cell--black {
+  background-color: var(--color-cell-black);
+}
+.board__image {
+  width: 100%;
+}
+
+.info {
+  display: flex;
+  align-items: center;
+  font-size: 2rem;
+  padding: 1rem 0;
+}
+.info__pieces {
+  margin-left: auto;
+}
+.info__time {
+  font-size: 3rem;
+}
 
 /*# sourceMappingURL=style.css.map */
