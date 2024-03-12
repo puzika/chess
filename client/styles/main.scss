@@ -9,9 +9,11 @@
 
 //LAYOUT
 
-@import './layout/layout';
+@import './layout/game';
+@import './layout/cover';
 
 //COMPONENT
 
 @import './components/board';
 @import './components/infobar';
+@import './components/form';

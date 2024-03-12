@@ -10,6 +10,32 @@
 </head>
 <body>
    <main class="game">
+      <div class="cover cover--hidden">
+         <form action="" class="form form--create">
+            <h3 class="form__heading form__heading--create">Create a game</h3>
+            <input type="radio" name="game type" id="bullet" class="form__type" value="bullet">
+            <label for="bullet" class="form__label form__label--create-game">Bullet</label>
+            <input type="radio" name="game type" id="blitz" class="form__type" value="blitz">
+            <label for="blitz" class="form__label form__label--create-game">Blitz</label>
+            <input type="radio" name="game type" id="rapid" class="form__type" value="rapid">
+            <label for="rapid" class="form__label form__label--create-game">Rapid</label>
+            <input type="radio" name="game type" id="classical" class="form__type" value="classical">
+            <label for="classical" class="form__label form__label--create-game">Classical</label>
+
+            <div class="form__link-box">
+               <label for="link-create" class="form__label form__label--create-game">Invite a friend</label>
+               <input id="link-create" type="text" class="form__link" readonly>
+            </div>
+         </form>
+
+         <p style="font-size: 2.5rem; text-align: center;">OR</p>
+
+         <form action="" class="form form--join">
+            <label for="link-join" class="label label--create-game">Join game</label>
+            <input id="link-join" type="text" class="form__link">
+         </form>
+      </div>
+
       <div class="info info--opponent">
          <p class="info__name info__name--opponent">Opponent</p>
          <p class="info__pieces info__pieces--opponent"></p>
