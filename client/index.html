@@ -13,17 +13,21 @@
       <h1 class="header__title">ChessZone</h1>
    </header>
 
+   <div class="loader">
+      <img src="./assets/loader.png" alt="spinner" class="loader__image">
+   </div>
+
    <main class="game">
       <div class="cover">
          <form action="" class="form form--create">
             <h3 class="form__heading form__heading--create">Create a game</h3>
-            <input type="radio" name="game type" id="bullet" class="form__type" value="bullet">
+            <input type="radio" name="game type" id="bullet" class="form__type" value="1">
             <label for="bullet" class="form__label form__label--create-game">Bullet</label>
-            <input type="radio" name="game type" id="blitz" class="form__type" value="blitz">
+            <input type="radio" name="game type" id="blitz" class="form__type" value="3">
             <label for="blitz" class="form__label form__label--create-game">Blitz</label>
-            <input type="radio" name="game type" id="rapid" class="form__type" value="rapid" checked>
+            <input type="radio" name="game type" id="rapid" class="form__type" value="10" checked>
             <label for="rapid" class="form__label form__label--create-game">Rapid</label>
-            <input type="radio" name="game type" id="classical" class="form__type" value="classical">
+            <input type="radio" name="game type" id="classical" class="form__type" value="60">
             <label for="classical" class="form__label form__label--create-game">Classical</label>
 
             <div class="form__link-box">

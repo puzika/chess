@@ -6,6 +6,8 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server);
 
+const rooms = new Map();
+
 app.use(express.static('../client'));
 
 io.on('connection', socket => {
@@ -15,17 +17,24 @@ io.on('connection', socket => {
 
    socket.on('create room', (room, type) => {
       socket.join(room);
+
+      rooms.set(room, { players: [socket.id], type });
+
+      console.log(rooms);
    });
 
    socket.on('join request', room => {
-      const { rooms } = io.sockets.adapter;
       let accessGranted = true;
 
-      if (rooms.has(room) && rooms.get(room).size < 2) {
+      if (rooms.has(room) && rooms.get(room).players.length < 2) {
          socket.join(room);
+
+         rooms.get(room).players.push(socket.id);
       } else {
          accessGranted = false;
       }
+
+      console.log(rooms);
 
       io.to(socket.id).emit('join response', accessGranted);
    });

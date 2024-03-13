@@ -1,6 +1,7 @@
 const socket = io('http://localhost:3000');
 
 const grid = document.querySelector('.board');
+const loader = document.querySelector('.loader');
 const createForm = document.querySelector('.form--create');
 const joinForm = document.querySelector('.form--join');
 const createLink = document.querySelector('.form__link--create');
@@ -56,7 +57,7 @@ createForm.addEventListener('submit', e => {
 
    navigator.clipboard.writeText(room);
 
-   socket.emit('create room', room)
+   socket.emit('create room', room, type);
 });
 
 joinForm.addEventListener('submit', e => {
@@ -69,6 +70,7 @@ joinForm.addEventListener('submit', e => {
 
 socket.on('connected', () => {
    createLink.value = `room${socket.id}`;
+   loader.classList.add('loader--hidden');
 });
 
 //JOIN REQUEST RESPONSE
