@@ -1,6 +1,8 @@
 const socket = io('http://localhost:3000');
 
 const grid = document.querySelector('.board');
+const createForm = document.querySelector('.form--create');
+const joinForm = document.querySelector('.form--join');
 
 const board = [
    ['br', 'bn', 'bb', 'bq', 'bk', 'bb', 'bn', 'br'],
@@ -40,6 +42,10 @@ function initializeBoard() {
 window.addEventListener('resize', () => {
    const width = grid.offsetWidth;
    grid.style.height = `${width}px`;
+});
+
+createForm.addEventListener('submit', e => {
+   e.preventDefault();
 });
 
 initializeBoard();

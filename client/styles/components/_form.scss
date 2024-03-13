@@ -1,13 +1,19 @@
 .form {
+   font-size: 2rem;
    padding: 2rem;
    background-color: var(--color-white);
 
    &--create {
       display: grid;
       grid-template-columns: min-content 1fr;
-      grid-template-rows: repeat(6, min-content);
+      grid-template-rows: repeat(7, min-content);
       align-items: center;
       gap: 1rem;
+   }
+
+   &__type,
+   &__label {
+      cursor: pointer;
    }
 
    &--join,
@@ -27,6 +33,30 @@
 
    &__link-box {
       margin-top: 2rem;
-      grid-area: 6 / 1 / 7 / 3;
+      grid-column: 1 / -1;
+   }
+
+   &__link {
+      font-size: inherit;
+      padding: .2rem .5rem;
+      border: var(--border-primary);
+      border-radius: var(--border-radius-primary);
+      outline: none;
+   }
+
+   &__submit {
+      width: 30%;
+      min-width: 10rem;
+      align-self: center;
+      font-size: inherit;
+      padding: 1rem 0;
+      margin-top: 1rem;
+      border: var(--border-primary);
+      border-radius: var(--border-radius-primary);
+      cursor: pointer;
+
+      &--create {
+         grid-column: 1 / -1;
+      }
    }
 }

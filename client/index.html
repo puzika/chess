@@ -9,8 +9,12 @@
    <title>Chess</title>
 </head>
 <body>
+   <header class="header">
+      <h1 class="header__title">ChessZone</h1>
+   </header>
+
    <main class="game">
-      <div class="cover cover--hidden">
+      <div class="cover">
          <form action="" class="form form--create">
             <h3 class="form__heading form__heading--create">Create a game</h3>
             <input type="radio" name="game type" id="bullet" class="form__type" value="bullet">
@@ -24,7 +28,8 @@
 
             <div class="form__link-box">
                <label for="link-create" class="form__label form__label--create-game">Invite a friend</label>
-               <input id="link-create" type="text" class="form__link" readonly>
+               <input id="link-create" type="text" class="form__link form__link--create" readonly>
+               <button class="form__submit form__submit--create">Create</button>
             </div>
          </form>
 
@@ -32,7 +37,8 @@
 
          <form action="" class="form form--join">
             <label for="link-join" class="label label--create-game">Join game</label>
-            <input id="link-join" type="text" class="form__link">
+            <input id="link-join" type="text" class="form__link form__link--join">
+            <button class="form__submit form__submit--join">Join</button>
          </form>
       </div>
 

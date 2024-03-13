@@ -3,6 +3,8 @@
   --color-cell-black: #B58763;
   --color-background: #ECEBE7;
   --color-white: #fff;
+  --border-primary: .1rem solid black;
+  --border-radius-primary: .5rem;
 }
 
 *,
@@ -23,6 +25,15 @@ body {
   background-color: var(--color-background);
 }
 
+.header {
+  padding: 2rem 0;
+  margin-bottom: 5rem;
+}
+.header__title {
+  font-size: 4rem;
+  text-align: center;
+}
+
 .game {
   position: relative;
   margin: 0 auto;
@@ -37,7 +48,6 @@ body {
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   background: var(--color-background);
 }
 .cover > *:not(:last-child) {
@@ -82,15 +92,19 @@ body {
 }
 
 .form {
+  font-size: 2rem;
   padding: 2rem;
   background-color: var(--color-white);
 }
 .form--create {
   display: grid;
   grid-template-columns: min-content 1fr;
-  grid-template-rows: repeat(6, min-content);
+  grid-template-rows: repeat(7, min-content);
   align-items: center;
   gap: 1rem;
+}
+.form__type, .form__label {
+  cursor: pointer;
 }
 .form--join, .form__link-box {
   display: flex;
@@ -105,7 +119,28 @@ body {
 }
 .form__link-box {
   margin-top: 2rem;
-  grid-area: 6/1/7/3;
+  grid-column: 1/-1;
+}
+.form__link {
+  font-size: inherit;
+  padding: 0.2rem 0.5rem;
+  border: var(--border-primary);
+  border-radius: var(--border-radius-primary);
+  outline: none;
+}
+.form__submit {
+  width: 30%;
+  min-width: 10rem;
+  align-self: center;
+  font-size: inherit;
+  padding: 1rem 0;
+  margin-top: 1rem;
+  border: var(--border-primary);
+  border-radius: var(--border-radius-primary);
+  cursor: pointer;
+}
+.form__submit--create {
+  grid-column: 1/-1;
 }
 
 /*# sourceMappingURL=style.css.map */

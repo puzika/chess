@@ -6,7 +6,6 @@
    height: 100%;
    display: flex;
    flex-direction: column;
-   justify-content: center;
    background: var(--color-background);
 
    & > *:not(:last-child) {
