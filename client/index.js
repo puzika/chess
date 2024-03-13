@@ -3,6 +3,9 @@ const socket = io('http://localhost:3000');
 const grid = document.querySelector('.board');
 const createForm = document.querySelector('.form--create');
 const joinForm = document.querySelector('.form--join');
+const createLink = document.querySelector('.form__link--create');
+const joinLink = document.querySelector('.form__link--join');
+const types = [...document.querySelectorAll('.form__type')];
 
 const board = [
    ['br', 'bn', 'bb', 'bq', 'bk', 'bb', 'bn', 'br'],
@@ -46,6 +49,35 @@ window.addEventListener('resize', () => {
 
 createForm.addEventListener('submit', e => {
    e.preventDefault();
+
+   const selected = types.find(type => type.checked);
+   const type = selected.value;
+   const room = createLink.value;
+
+   navigator.clipboard.writeText(room);
+
+   socket.emit('create room', room)
 });
+
+joinForm.addEventListener('submit', e => {
+   e.preventDefault();
+
+   socket.emit('join request', joinLink.value);
+})
+
+//NEW ROOM LINK
+
+socket.on('connected', () => {
+   createLink.value = `room${socket.id}`;
+});
+
+//JOIN REQUEST RESPONSE
+
+socket.on('join response', accessGranted => {
+   if (accessGranted) console.log('joined room successfully');
+   else console.log('failed to join room');
+})
+
+//INITIALIZE BOARD
 
 initializeBoard();
