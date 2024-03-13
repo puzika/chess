@@ -28,8 +28,8 @@ io.on('connection', socket => {
 
       if (rooms.has(room) && rooms.get(room).players.length < 2) {
          socket.join(room);
-
          rooms.get(room).players.push(socket.id);
+         io.in(room).emit('game ready', rooms.get(room));
       } else {
          accessGranted = false;
       }

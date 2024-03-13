@@ -2,6 +2,8 @@ const socket = io('http://localhost:3000');
 
 const grid = document.querySelector('.board');
 const loader = document.querySelector('.loader');
+const loaderMessage = document.querySelector('.loader__message');
+const cover = document.querySelector('.cover');
 const createForm = document.querySelector('.form--create');
 const joinForm = document.querySelector('.form--join');
 const createLink = document.querySelector('.form__link--create');
@@ -43,6 +45,16 @@ function initializeBoard() {
    }
 }
 
+function showLoader(message = '') {
+   loaderMessage.textContent = message;
+   loader.classList.remove('loader--hidden');
+}
+
+function hideLoader() {
+   loaderMessage.textContent = '';
+   loader.classList.add('loader--hidden');
+}
+
 window.addEventListener('resize', () => {
    const width = grid.offsetWidth;
    grid.style.height = `${width}px`;
@@ -58,28 +70,38 @@ createForm.addEventListener('submit', e => {
    navigator.clipboard.writeText(room);
 
    socket.emit('create room', room, type);
+
+   showLoader('waiting for the opponent');
 });
 
 joinForm.addEventListener('submit', e => {
    e.preventDefault();
 
    socket.emit('join request', joinLink.value);
+
+   showLoader('joining...');
 })
 
 //NEW ROOM LINK
 
 socket.on('connected', () => {
    createLink.value = `room${socket.id}`;
-   loader.classList.add('loader--hidden');
+   hideLoader();
 });
 
 //JOIN REQUEST RESPONSE
 
 socket.on('join response', accessGranted => {
-   if (accessGranted) console.log('joined room successfully');
-   else console.log('failed to join room');
+   if (!accessGranted) console.log('failed to join');
+   else console.log('joined successfully');
 })
 
 //INITIALIZE BOARD
 
-initializeBoard();
+socket.on('game ready', roomInfo => {
+   hideLoader();
+   cover.classList.add('cover--hidden');
+
+   initializeBoard();
+   console.log('spielbereit', roomInfo);
+});
