@@ -15,12 +15,10 @@ io.on('connection', socket => {
 
    io.to(socket.id).emit('connected');
 
-   socket.on('create room', (room, type) => {
+   socket.on('create room', (room, type, col) => {
       socket.join(room);
 
       rooms.set(room, { players: [socket.id], type });
-
-      console.log(rooms);
    });
 
    socket.on('join request', room => {

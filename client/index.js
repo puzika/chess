@@ -9,21 +9,33 @@ const joinForm = document.querySelector('.form--join');
 const createLink = document.querySelector('.form__link--create');
 const joinLink = document.querySelector('.form__link--join');
 const types = [...document.querySelectorAll('.form__type')];
+const timeSelf = document.querySelector('.info__time--self');
+const timeOpponent = document.querySelector('.info__time--opponent');
+const nameSelf = document.querySelector('.info__name--self');
+const nameOpponent = document.querySelector('.info__name--opponent');
 
-const board = [
-   ['br', 'bn', 'bb', 'bq', 'bk', 'bb', 'bn', 'br'],
-   ['bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp'],
-   ['', '', '', '', '', '', '', ''],
-   ['', '', '', '', '', '', '', ''],
-   ['', '', '', '', '', '', '', ''],
-   ['', '', '', '', '', '', '', ''],
-   ['wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp'],
-   ['wr', 'wn', 'wb', 'wq', 'wk', 'wb', 'wn', 'wr']
-]
+let board;
+let cSelf;
+let cOp;
+
+function createBoard() {
+   board = [
+      [`${cOp}r`, `${cOp}n`, `${cOp}b`, `${cOp}q`, `${cOp}k`, `${cOp}b`, `${cOp}n`, `${cOp}r`],
+      [`${cOp}p`, `${cOp}p`, `${cOp}p`, `${cOp}p`, `${cOp}p`, `${cOp}p`, `${cOp}p`, `${cOp}p`],
+      ['', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', ''],
+      [`${cSelf}p`, `${cSelf}p`, `${cSelf}p`, `${cSelf}p`, `${cSelf}p`, `${cSelf}p`, `${cSelf}p`, `${cSelf}p`],
+      [`${cSelf}r`, `${cSelf}n`, `${cSelf}b`, `${cSelf}q`, `${cSelf}k`, `${cSelf}b`, `${cSelf}n`, `${cSelf}r`]
+   ];
+}
 
 function initializeBoard() {
    const width = grid.offsetWidth;
    grid.style.height = `${width}px`;
+
+   createBoard();
 
    const [cols, rows] = [8, 8];
 
@@ -102,6 +114,20 @@ socket.on('game ready', roomInfo => {
    hideLoader();
    cover.classList.add('cover--hidden');
 
+   let [playerName1, playerName2] = roomInfo.players;
+   [cSelf, cOp] = ['w', 'b'];
+
+   if (playerName1 !== socket.id) {
+      [playerName1, playerName2] = [playerName2, playerName1];
+      [cSelf, cOp] = ['b', 'w'];
+   }
+
+   nameSelf.textContent = playerName1;
+   nameOpponent.textContent = playerName2;
+
+   const time = roomInfo.type;
+   timeOpponent.textContent = `${time}:00`;
+   timeSelf.textContent = `${time}:00`;
+
    initializeBoard();
-   console.log('spielbereit', roomInfo);
 });
