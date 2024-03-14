@@ -15,10 +15,9 @@ const nameSelf = document.querySelector('.info__name--self');
 const nameOpponent = document.querySelector('.info__name--opponent');
 
 let board;
-let cSelf;
-let cOp;
+let turn = 'w';
 
-function createBoard() {
+function createBoard(cSelf, cOp) {
    board = [
       [`${cOp}r`, `${cOp}n`, `${cOp}b`, `${cOp}q`, `${cOp}k`, `${cOp}b`, `${cOp}n`, `${cOp}r`],
       [`${cOp}p`, `${cOp}p`, `${cOp}p`, `${cOp}p`, `${cOp}p`, `${cOp}p`, `${cOp}p`, `${cOp}p`],
@@ -35,8 +34,6 @@ function initializeBoard() {
    const width = grid.offsetWidth;
    grid.style.height = `${width}px`;
 
-   createBoard();
-
    const [cols, rows] = [8, 8];
 
    for (let i = 0; i < rows; i++) {
@@ -44,7 +41,7 @@ function initializeBoard() {
          const color = (i % 2 === 0 && j % 2 === 0) || (i % 2 !== 0 && j % 2 !== 0) ? 'white' : 'black';
          const piece = board[i][j] ?
             `<img draggable="true" 
-                  class="board__image" 
+                  class="board__piece ${board[i][j][0] === 'w' ? 'white' : 'black'}" 
                   alt="${board[i][j]}" 
                   src="./assets/${board[i][j]}.png">` : '';
 
@@ -106,7 +103,34 @@ socket.on('connected', () => {
 socket.on('join response', accessGranted => {
    if (!accessGranted) console.log('failed to join');
    else console.log('joined successfully');
-})
+});
+
+//DRAG AND DROP FUNCTIONS AND VARS
+
+let currentPiece = null;
+
+function dragStart() {
+   currentPiece = this;
+}
+
+function dragOver(e) {
+   e.preventDefault();
+}
+
+function dragEnter() {
+
+}
+
+function dragLeave() {
+
+}
+
+function drop() {
+   if (this.innerHTML) return;
+
+   currentPiece.remove();
+   this.append(currentPiece);
+}
 
 //INITIALIZE BOARD
 
@@ -115,11 +139,11 @@ socket.on('game ready', roomInfo => {
    cover.classList.add('cover--hidden');
 
    let [playerName1, playerName2] = roomInfo.players;
-   [cSelf, cOp] = ['w', 'b'];
+   let [colorSelf, colorOpponent] = ['w', 'b'];
 
    if (playerName1 !== socket.id) {
       [playerName1, playerName2] = [playerName2, playerName1];
-      [cSelf, cOp] = ['b', 'w'];
+      [colorSelf, colorOpponent] = [colorOpponent, colorSelf];
    }
 
    nameSelf.textContent = playerName1;
@@ -129,5 +153,22 @@ socket.on('game ready', roomInfo => {
    timeOpponent.textContent = `${time}:00`;
    timeSelf.textContent = `${time}:00`;
 
+   createBoard(colorSelf, colorOpponent);
    initializeBoard();
+
+   //INITIALIZE DRAG AND DROP
+
+   const cells = document.querySelectorAll('.board__cell');
+   const pieces = document.querySelectorAll('.board__piece');
+
+   for (const piece of pieces) {
+      piece.addEventListener('dragstart', dragStart);
+   }
+
+   for (const cell of cells) {
+      cell.addEventListener('dragover', dragOver);
+      cell.addEventListener('dragenter', dragEnter);
+      cell.addEventListener('dragleave', dragLeave);
+      cell.addEventListener('drop', drop);
+   }
 });

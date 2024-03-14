@@ -74,7 +74,7 @@ body {
 .board__cell--black {
   background-color: var(--color-cell-black);
 }
-.board__image {
+.board__piece {
   width: 100%;
 }
 
