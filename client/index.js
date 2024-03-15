@@ -17,6 +17,8 @@ const nameOpponent = document.querySelector('.info__name--opponent');
 let board;
 let room;
 let turn = 'w';
+let colorSelf;
+let colorOpponent;
 
 function createBoard(cSelf, cOp) {
    board = [
@@ -41,8 +43,9 @@ function initializeBoard() {
       for (let j = 0; j < cols; j++) {
          const color = (i % 2 === 0 && j % 2 === 0) || (i % 2 !== 0 && j % 2 !== 0) ? 'white' : 'black';
          const piece = board[i][j] ?
-            `<img draggable="true" 
+            `<img draggable="${(colorSelf === 'w' && board[i][j][0] === 'w') ? "true" : "false"}" 
                   class="board__piece"
+                  data-color="${board[i][j][0]}"
                   data-piece="${board[i][j]}"
                   alt="${board[i][j]}"
                   src="./assets/${board[i][j]}.png">` : '';
@@ -134,6 +137,14 @@ function drop() {
 
    if (this.innerHTML) return;
 
+   const pieces = document.querySelectorAll('.board__piece');
+
+   pieces.forEach(piece => {
+      if (piece.dataset.color === colorSelf) {
+         piece.setAttribute("draggable", "false");
+      }
+   });
+
    const cell = currentPiece.parentElement;
    const { piece } = currentPiece.dataset.piece;
    const rowOrigin = +cell.dataset.row;
@@ -163,6 +174,14 @@ function drop() {
 socket.on('move opponent', (coords, pieceName) => {
    const { rowOrigin, rowDest, colOrigin, colDest } = coords;
 
+   const pieces = document.querySelectorAll('.board__piece');
+
+   pieces.forEach(piece => {
+      if (piece.dataset.color === colorSelf) {
+         piece.setAttribute("draggable", "true");
+      }
+   });
+
    const positionOrigin = document.querySelector(`[data-row="${rowOrigin}"][data-col="${colOrigin}"]`);
    const positionFinal = document.querySelector(`[data-row="${rowDest}"][data-col="${colDest}"]`);
    const piece = positionOrigin.firstElementChild;
@@ -181,7 +200,7 @@ socket.on('game ready', roomInfo => {
    cover.classList.add('cover--hidden');
 
    let [playerName1, playerName2] = roomInfo.players;
-   let [colorSelf, colorOpponent] = ['w', 'b'];
+   [colorSelf, colorOpponent] = ['w', 'b'];
 
    if (playerName1 !== socket.id) {
       [playerName1, playerName2] = [playerName2, playerName1];
