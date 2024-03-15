@@ -74,6 +74,9 @@ body {
 .board__cell--black {
   background-color: var(--color-cell-black);
 }
+.board__cell--hovered {
+  background-image: linear-gradient(rgba(59, 160, 59, 0.6), rgba(59, 160, 59, 0.6));
+}
 .board__piece {
   width: 100%;
 }

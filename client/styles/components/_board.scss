@@ -16,6 +16,10 @@
       &--black {
          background-color: var(--color-cell-black);
       }
+
+      &--hovered {
+         background-image: linear-gradient(rgba(59, 160, 59, 0.6), rgba(59, 160, 59, 0.6));
+      }
    }
 
    &__piece {

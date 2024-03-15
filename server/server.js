@@ -32,9 +32,11 @@ io.on('connection', socket => {
          accessGranted = false;
       }
 
-      console.log(rooms);
-
       io.to(socket.id).emit('join response', accessGranted);
+   });
+
+   socket.on('move', (room, coords, piece) => {
+      socket.to(room).emit('move opponent', coords, piece);
    });
 
    socket.on('disconnect', () => {

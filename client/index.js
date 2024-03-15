@@ -15,6 +15,7 @@ const nameSelf = document.querySelector('.info__name--self');
 const nameOpponent = document.querySelector('.info__name--opponent');
 
 let board;
+let room;
 let turn = 'w';
 
 function createBoard(cSelf, cOp) {
@@ -41,12 +42,13 @@ function initializeBoard() {
          const color = (i % 2 === 0 && j % 2 === 0) || (i % 2 !== 0 && j % 2 !== 0) ? 'white' : 'black';
          const piece = board[i][j] ?
             `<img draggable="true" 
-                  class="board__piece ${board[i][j][0] === 'w' ? 'white' : 'black'}" 
-                  alt="${board[i][j]}" 
+                  class="board__piece"
+                  data-piece="${board[i][j]}"
+                  alt="${board[i][j]}"
                   src="./assets/${board[i][j]}.png">` : '';
 
          const markup = `
-            <span class="board__cell board__cell--${color}">${piece}</span>
+            <span data-row="${i}" data-col="${j}" class="board__cell board__cell--${color}">${piece}</span>
          `;
 
          grid.insertAdjacentHTML('beforeend', markup);
@@ -74,7 +76,7 @@ createForm.addEventListener('submit', e => {
 
    const selected = types.find(type => type.checked);
    const type = selected.value;
-   const room = createLink.value;
+   room = createLink.value;
 
    navigator.clipboard.writeText(room);
 
@@ -86,7 +88,9 @@ createForm.addEventListener('submit', e => {
 joinForm.addEventListener('submit', e => {
    e.preventDefault();
 
-   socket.emit('join request', joinLink.value);
+   room = joinLink.value;
+
+   socket.emit('join request', room);
 
    showLoader('joining...');
 })
@@ -118,19 +122,57 @@ function dragOver(e) {
 }
 
 function dragEnter() {
-
+   this.classList.add('board__cell--hovered');
 }
 
 function dragLeave() {
-
+   this.classList.remove('board__cell--hovered');
 }
 
 function drop() {
+   this.classList.remove('board__cell--hovered');
+
    if (this.innerHTML) return;
+
+   const cell = currentPiece.parentElement;
+   const { piece } = currentPiece.dataset.piece;
+   const rowOrigin = +cell.dataset.row;
+   const colOrigin = +cell.dataset.col;
+   const rowDest = +this.dataset.row;
+   const colDest = +this.dataset.col;
+
+   board[rowOrigin][colOrigin] = '';
+   board[rowDest][colDest] = piece;
 
    currentPiece.remove();
    this.append(currentPiece);
+
+   const coords = {
+      rowOrigin: 7 - rowOrigin,
+      colOrigin,
+      rowDest: 7 - rowDest,
+      colDest,
+   }
+
+   //coords on opponents board are 7 - row, col where 7 = rows - 1
+   socket.emit('move', room, coords, piece);
 }
+
+//DISPLAY MOVE ON OPPONENTS BOARD
+
+socket.on('move opponent', (coords, pieceName) => {
+   const { rowOrigin, rowDest, colOrigin, colDest } = coords;
+
+   const positionOrigin = document.querySelector(`[data-row="${rowOrigin}"][data-col="${colOrigin}"]`);
+   const positionFinal = document.querySelector(`[data-row="${rowDest}"][data-col="${colDest}"]`);
+   const piece = positionOrigin.firstElementChild;
+
+   board[rowOrigin][colOrigin] = '';
+   board[rowDest][colDest] = pieceName;
+
+   piece.remove();
+   positionFinal.append(piece);
+});
 
 //INITIALIZE BOARD
 
