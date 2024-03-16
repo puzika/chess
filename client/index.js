@@ -108,8 +108,12 @@ socket.on('connected', () => {
 //JOIN REQUEST RESPONSE
 
 socket.on('join response', accessGranted => {
-   if (!accessGranted) console.log('failed to join');
-   else console.log('joined successfully');
+   if (!accessGranted) {
+      hideLoader();
+      alert("failed to join (Either the room is full or it does't exist)");
+   } else {
+      console.log('joined successfully');
+   }
 });
 
 //DRAG AND DROP FUNCTIONS AND VARS
