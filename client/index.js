@@ -9,18 +9,23 @@ const joinForm = document.querySelector('.form--join');
 const createLink = document.querySelector('.form__link--create');
 const joinLink = document.querySelector('.form__link--join');
 const types = [...document.querySelectorAll('.form__type')];
-const timeSelf = document.querySelector('.info__time--self');
-const timeOpponent = document.querySelector('.info__time--opponent');
+const timerSelf = document.querySelector('.info__time--self');
+const timerOpponent = document.querySelector('.info__time--opponent');
 const nameSelf = document.querySelector('.info__name--self');
 const nameOpponent = document.querySelector('.info__name--opponent');
 const capturedSelf = document.querySelector('.captured--self');
 const capturedOpponent = document.querySelector('.captured--opponent');
+
+const INTERVAL = 1000;
 
 let board;
 let room;
 let turn = 'w';
 let colorSelf;
 let colorOpponent;
+let timeSelf;
+let timeOpponent;
+let timer;
 
 function createBoard(cSelf, cOp) {
    board = [
@@ -60,6 +65,8 @@ function initializeBoard() {
       }
    }
 }
+
+//SHOWING AND HIDING LOADER
 
 function showLoader(message = '') {
    loaderMessage.textContent = message;
@@ -118,6 +125,31 @@ socket.on('join response', accessGranted => {
    }
 });
 
+//SET TIMER FUNCTION
+
+function setTimer() {
+   clearInterval(timer);
+
+   timer = setInterval(() => {
+      let time;
+
+      if (turn === colorSelf) {
+         currentTimer = timerSelf;
+         time = timeSelf;
+         timeSelf--;
+      } else {
+         currentTimer = timerOpponent;
+         time = timeOpponent;
+         timeOpponent--;
+      }
+
+      const minutes = `${Math.floor(time / 60)}`.padStart(2, '0');
+      const seconds = `${time % 60}`.padStart(2, '0');
+
+      currentTimer.textContent = `${minutes}:${seconds}`;
+   }, INTERVAL);
+}
+
 //DRAG AND DROP FUNCTIONS AND VARS
 
 let currentPiece = null;
@@ -146,6 +178,8 @@ function drop() {
 
       if (color === colorSelf) return;
    }
+
+   turn = colorOpponent;
 
    const pieces = document.querySelectorAll('.board__piece');
 
@@ -189,12 +223,16 @@ function drop() {
 
    //coords on opponents board are 7 - row, col where 7 = rows - 1
    socket.emit('move', room, coords, piece);
+
+   setTimer();
 }
 
 //DISPLAY MOVE ON OPPONENTS BOARD
 
 socket.on('move opponent', (coords, pieceName) => {
    const { rowOrigin, rowDest, colOrigin, colDest } = coords;
+
+   turn = colorSelf;
 
    const pieces = document.querySelectorAll('.board__piece');
 
@@ -225,13 +263,18 @@ socket.on('move opponent', (coords, pieceName) => {
 
    piece.remove();
    positionFinal.append(piece);
+
+   setTimer();
 });
 
-//INITIALIZE BOARD
+//INITIALIZE GAME
 
 socket.on('game ready', roomInfo => {
    hideLoader();
    cover.classList.add('cover--hidden');
+
+   timeSelf = +roomInfo.type * 60;
+   timeOpponent = timeSelf;
 
    let [playerName1, playerName2] = roomInfo.players;
    [colorSelf, colorOpponent] = ['w', 'b'];
@@ -244,9 +287,13 @@ socket.on('game ready', roomInfo => {
    nameSelf.textContent = playerName1;
    nameOpponent.textContent = playerName2;
 
-   const time = roomInfo.type;
-   timeOpponent.textContent = `${time}:00`;
-   timeSelf.textContent = `${time}:00`;
+   //INITIALIZE TIMER
+
+   timerOpponent.textContent = `${timeOpponent / 60}:00`;
+   timerSelf.textContent = `${timeSelf / 60}:00`;
+   setTimer();
+
+   //INITIALIZE BOARD
 
    createBoard(colorSelf, colorOpponent);
    initializeBoard();
