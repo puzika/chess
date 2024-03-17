@@ -139,7 +139,11 @@ function dragLeave() {
 function drop() {
    this.classList.remove('board__cell--hovered');
 
-   if (this.innerHTML) return;
+   if (this.innerHTML) {
+      const { color } = this.firstElementChild.dataset;
+
+      if (color === colorSelf) return;
+   }
 
    const pieces = document.querySelectorAll('.board__piece');
 
@@ -158,6 +162,11 @@ function drop() {
 
    board[rowOrigin][colOrigin] = '';
    board[rowDest][colDest] = piece;
+
+   if (this.hasChildNodes()) {
+      const child = this.firstElementChild;
+      child.remove();
+   }
 
    currentPiece.remove();
    this.append(currentPiece);
@@ -192,6 +201,11 @@ socket.on('move opponent', (coords, pieceName) => {
 
    board[rowOrigin][colOrigin] = '';
    board[rowDest][colDest] = pieceName;
+
+   if (positionFinal.hasChildNodes()) {
+      const child = positionFinal.firstElementChild;
+      child.remove();
+   }
 
    piece.remove();
    positionFinal.append(piece);
