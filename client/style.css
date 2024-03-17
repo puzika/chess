@@ -83,12 +83,10 @@ body {
 
 .info {
   display: flex;
+  justify-content: space-between;
   align-items: center;
   font-size: 2rem;
   padding: 1rem 0;
-}
-.info__pieces {
-  margin-left: auto;
 }
 .info__time {
   font-size: 3rem;
@@ -174,6 +172,14 @@ body {
   100% {
     transform: rotate(360deg);
   }
+}
+.captured {
+  width: 100%;
+  height: 2rem;
+  display: flex;
+}
+.captured__piece {
+  height: 100%;
 }
 
 /*# sourceMappingURL=style.css.map */

@@ -1,0 +1,9 @@
+.captured {
+   width: 100%;
+   height: 2rem;
+   display: flex;
+
+   &__piece {
+      height: 100%;
+   }
+}

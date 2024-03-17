@@ -13,6 +13,8 @@ const timeSelf = document.querySelector('.info__time--self');
 const timeOpponent = document.querySelector('.info__time--opponent');
 const nameSelf = document.querySelector('.info__name--self');
 const nameOpponent = document.querySelector('.info__name--opponent');
+const capturedSelf = document.querySelector('.captured--self');
+const capturedOpponent = document.querySelector('.captured--opponent');
 
 let board;
 let room;
@@ -165,6 +167,13 @@ function drop() {
 
    if (this.hasChildNodes()) {
       const child = this.firstElementChild;
+      const { piece } = child.dataset;
+
+      const markup = `
+      <img alt="${piece}" class="captured__piece" src="./assets/${piece}.png">
+      `;
+
+      capturedSelf.insertAdjacentHTML('beforeend', markup);
       child.remove();
    }
 
@@ -204,6 +213,13 @@ socket.on('move opponent', (coords, pieceName) => {
 
    if (positionFinal.hasChildNodes()) {
       const child = positionFinal.firstElementChild;
+      const { piece } = child.dataset;
+
+      const markup = `
+      <img alt="${piece}" class="captured__piece" src="./assets/${piece}.png">
+      `;
+
+      capturedOpponent.insertAdjacentHTML('beforeend', markup);
       child.remove();
    }
 
