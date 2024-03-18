@@ -28,15 +28,19 @@ let timeOpponent;
 let timer;
 
 function createBoard(cSelf, cOp) {
+   let [king, queen] = ['k', 'q'];
+
+   if (colorSelf === 'b') [king, queen] = [queen, king];
+
    board = [
-      [`${cOp}r`, `${cOp}n`, `${cOp}b`, `${cOp}q`, `${cOp}k`, `${cOp}b`, `${cOp}n`, `${cOp}r`],
+      [`${cOp}r`, `${cOp}n`, `${cOp}b`, `${cOp}${queen}`, `${cOp}${king}`, `${cOp}b`, `${cOp}n`, `${cOp}r`],
       [`${cOp}p`, `${cOp}p`, `${cOp}p`, `${cOp}p`, `${cOp}p`, `${cOp}p`, `${cOp}p`, `${cOp}p`],
       ['', '', '', '', '', '', '', ''],
       ['', '', '', '', '', '', '', ''],
       ['', '', '', '', '', '', '', ''],
       ['', '', '', '', '', '', '', ''],
       [`${cSelf}p`, `${cSelf}p`, `${cSelf}p`, `${cSelf}p`, `${cSelf}p`, `${cSelf}p`, `${cSelf}p`, `${cSelf}p`],
-      [`${cSelf}r`, `${cSelf}n`, `${cSelf}b`, `${cSelf}q`, `${cSelf}k`, `${cSelf}b`, `${cSelf}n`, `${cSelf}r`]
+      [`${cSelf}r`, `${cSelf}n`, `${cSelf}b`, `${cSelf}${queen}`, `${cSelf}${king}`, `${cSelf}b`, `${cSelf}n`, `${cSelf}r`]
    ];
 }
 
@@ -216,9 +220,9 @@ function drop() {
 
    const coords = {
       rowOrigin: 7 - rowOrigin,
-      colOrigin,
+      colOrigin: 7 - colOrigin,
       rowDest: 7 - rowDest,
-      colDest,
+      colDest: 7 - colDest,
    }
 
    //coords on opponents board are 7 - row, col where 7 = rows - 1
