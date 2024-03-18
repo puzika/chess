@@ -20,6 +20,22 @@
       &--hovered {
          background-image: linear-gradient(rgba(59, 160, 59, 0.6), rgba(59, 160, 59, 0.6));
       }
+
+      &--potential {
+         position: relative;
+
+         &::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            background-color: black;
+         }
+      }
    }
 
    &__piece {

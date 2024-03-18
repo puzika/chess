@@ -27,6 +27,25 @@ let timeSelf;
 let timeOpponent;
 let timer;
 
+const rules = {
+   'n': {
+      getMoves(row, col) {
+         const result = [];
+
+         if (row - 1 >= 0 && col + 2 <= 7) result.push([row - 1, col + 2]);
+         if (row - 1 >= 0 && col - 2 >= 0) result.push([row - 1, col - 2]);
+         if (row + 1 <= 7 && col + 2 <= 7) result.push([row + 1, col + 2]);
+         if (row + 1 <= 7 && col - 2 >= 0) result.push([row + 1, col - 2]);
+         if (row - 2 >= 0 && col + 1 <= 7) result.push([row - 2, col + 1]);
+         if (row - 2 >= 0 && col - 1 >= 0) result.push([row - 2, col - 1]);
+         if (row + 2 <= 7 && col + 1 <= 7) result.push([row + 2, col + 1]);
+         if (row + 2 <= 7 && col - 1 >= 0) result.push([row + 2, col - 1]);
+
+         return result;
+      }
+   },
+}
+
 function createBoard(cSelf, cOp) {
    let [king, queen] = ['k', 'q'];
 
@@ -57,6 +76,7 @@ function initializeBoard() {
             `<img draggable="${(colorSelf === 'w' && board[i][j][0] === 'w') ? "true" : "false"}" 
                   class="board__piece"
                   data-color="${board[i][j][0]}"
+                  data-name="${board[i][j][1]}"
                   data-piece="${board[i][j]}"
                   alt="${board[i][j]}"
                   src="./assets/${board[i][j]}.png">` : '';
@@ -160,6 +180,19 @@ let currentPiece = null;
 
 function dragStart() {
    currentPiece = this;
+   const cell = currentPiece.parentElement;
+   const { name } = currentPiece.dataset;
+   const rowOrigin = +cell.dataset.row;
+   const colOrigin = +cell.dataset.col;
+
+   const moves = rules[name].getMoves(rowOrigin, colOrigin);
+
+   moves.forEach(move => {
+      const [row, col] = move;
+      const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+
+      if (!cell.hasChildNodes()) cell.classList.add('board__cell--potential');
+   });
 }
 
 function dragOver(e) {
@@ -167,7 +200,7 @@ function dragOver(e) {
 }
 
 function dragEnter() {
-   this.classList.add('board__cell--hovered');
+   if (this.classList.contains('board__cell--potential')) this.classList.add('board__cell--hovered');
 }
 
 function dragLeave() {
@@ -185,6 +218,10 @@ function drop() {
 
    turn = colorOpponent;
 
+   const potentialCells = document.querySelectorAll('.board__cell--potential');
+
+   potentialCells.forEach(cell => cell.classList.remove('board__cell--potential'))
+
    const pieces = document.querySelectorAll('.board__piece');
 
    pieces.forEach(piece => {
@@ -194,7 +231,7 @@ function drop() {
    });
 
    const cell = currentPiece.parentElement;
-   const { piece } = currentPiece.dataset.piece;
+   const { piece } = currentPiece.dataset;
    const rowOrigin = +cell.dataset.row;
    const colOrigin = +cell.dataset.col;
    const rowDest = +this.dataset.row;

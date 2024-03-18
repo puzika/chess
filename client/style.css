@@ -77,6 +77,20 @@ body {
 .board__cell--hovered {
   background-image: linear-gradient(rgba(59, 160, 59, 0.6), rgba(59, 160, 59, 0.6));
 }
+.board__cell--potential {
+  position: relative;
+}
+.board__cell--potential::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background-color: black;
+}
 .board__piece {
   width: 100%;
 }
