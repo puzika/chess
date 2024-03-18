@@ -174,6 +174,20 @@ function setTimer() {
    }, INTERVAL);
 }
 
+//REMOVING HINTS
+
+function removeHints() {
+   //REMOVE DOTS
+
+   const moveCells = document.querySelectorAll('.board__cell--move');
+   moveCells.forEach(cell => cell.classList.remove('board__cell--move'));
+
+   //REMOVE CAPTURES
+
+   const captureCells = document.querySelectorAll('.board__cell--capture');
+   captureCells.forEach(cell => cell.classList.remove('board__cell--capture'));
+}
+
 //DRAG AND DROP FUNCTIONS AND VARS
 
 let currentPiece = null;
@@ -190,8 +204,14 @@ function dragStart() {
    moves.forEach(move => {
       const [row, col] = move;
       const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+      const hasChildren = cell.hasChildNodes();
 
-      if (!cell.hasChildNodes()) cell.classList.add('board__cell--potential');
+      if (!hasChildren) cell.classList.add('board__cell--move');
+      else {
+         const { color } = cell.firstElementChild.dataset;
+
+         if (color === colorOpponent) cell.classList.add('board__cell--capture');
+      }
    });
 }
 
@@ -200,7 +220,9 @@ function dragOver(e) {
 }
 
 function dragEnter() {
-   if (this.classList.contains('board__cell--potential')) this.classList.add('board__cell--hovered');
+   if (this.classList.contains('board__cell--move')) {
+      this.classList.add('board__cell--hovered');
+   }
 }
 
 function dragLeave() {
@@ -210,6 +232,14 @@ function dragLeave() {
 function drop() {
    this.classList.remove('board__cell--hovered');
 
+   if (!this.classList.contains('board__cell--move') &&
+      !this.classList.contains('board__cell--capture')) {
+      removeHints();
+      return;
+   }
+
+   removeHints();
+
    if (this.innerHTML) {
       const { color } = this.firstElementChild.dataset;
 
@@ -218,12 +248,9 @@ function drop() {
 
    turn = colorOpponent;
 
-   const potentialCells = document.querySelectorAll('.board__cell--potential');
-
-   potentialCells.forEach(cell => cell.classList.remove('board__cell--potential'))
+   //DISABLE DRAG
 
    const pieces = document.querySelectorAll('.board__piece');
-
    pieces.forEach(piece => {
       if (piece.dataset.color === colorSelf) {
          piece.setAttribute("draggable", "false");

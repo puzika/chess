@@ -5,6 +5,9 @@
   --color-white: #fff;
   --border-primary: .1rem solid black;
   --border-radius-primary: .5rem;
+  --color-highlight: rgba(59, 160, 59, 0.6);
+  --color-dot: rgb(59, 160, 59);
+  --color-capture: radial-gradient(rgb(182, 244, 146), rgb(51, 139, 147));
 }
 
 *,
@@ -75,12 +78,12 @@ body {
   background-color: var(--color-cell-black);
 }
 .board__cell--hovered {
-  background-image: linear-gradient(rgba(59, 160, 59, 0.6), rgba(59, 160, 59, 0.6));
+  background-image: linear-gradient(var(--color-highlight), var(--color-highlight));
 }
-.board__cell--potential {
+.board__cell--move {
   position: relative;
 }
-.board__cell--potential::after {
+.board__cell--move::after {
   content: "";
   position: absolute;
   top: 50%;
@@ -89,7 +92,10 @@ body {
   width: 1rem;
   height: 1rem;
   border-radius: 50%;
-  background-color: black;
+  background-color: var(--color-dot);
+}
+.board__cell--capture {
+  background-image: var(--color-capture);
 }
 .board__piece {
   width: 100%;
