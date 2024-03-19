@@ -44,6 +44,55 @@ const rules = {
          return result;
       }
    },
+
+   'b': {
+      getDiag(direction = 'bottom-right', row, col) {
+         let diag = [];
+         let reached = false;
+         const start = (direction === 'bottom-right') ?
+            [row - Math.min(row, col), col - Math.min(row, col)] :
+            [row - Math.min(row, 7 - col), col + Math.min(row, 7 - col)];
+
+         let [i, j] = start;
+
+         while (direction === 'bottom-right' &&
+            i < 8 && j < 8 ||
+            direction === 'bottom-left' &&
+            i < 8 && j >= 0) {
+            const cell = document.querySelector(`[data-row="${i}"][data-col="${j}"]`);
+            const child = cell.firstElementChild;
+
+            if (i !== row && j !== col) {
+               if (child) {
+                  if (!reached) diag = [];
+
+                  if (child.dataset.color === colorOpponent) diag.push([i, j]);
+
+                  if (reached) break;
+               } else {
+                  diag.push([i, j]);
+               }
+            } else {
+               reached = true;
+            }
+
+            direction === 'bottom-right' ? j++ : j--;
+            i++;
+         }
+
+         return diag;
+      },
+
+      getMoves(row, col) {
+         const topLeft = [row - Math.min(row, col), col - Math.min(row, col)];
+         const topRight = [row - Math.min(row, 7 - col), col + Math.min(row, 7 - col)];
+
+         const diag = this.getDiag('bottom-right', row, col);
+         const antiDiag = this.getDiag('bottom-left', row, col);
+
+         return [...diag, ...antiDiag];
+      }
+   }
 }
 
 function createBoard(cSelf, cOp) {
