@@ -28,6 +28,37 @@ let timeOpponent;
 let timer;
 
 const rules = {
+   'p': {
+      moved: new Set(),
+
+      canCapture(row, col) {
+         if (col > 0 && col < 8) {
+            const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+
+            const child = cell.firstElementChild;
+
+            if (!child) return false;
+
+            const { color } = cell.firstElementChild.dataset;
+
+            return color === colorOpponent;
+         }
+
+         return false;
+      },
+
+      getMoves(row, col) {
+         const result = [];
+         const cellFront = document.querySelector(`[data-row="${row - 1}"][data-col="${col}"]`);
+
+         if (!cellFront.hasChildNodes()) result.push([row - 1, col]);
+         if (this.canCapture(row - 1, col - 1)) result.push([row - 1, col - 1]);
+         if (this.canCapture(row - 1, col + 1)) result.push([row - 1, col + 1]);
+
+         return result;
+      }
+   },
+
    'n': {
       getMoves(row, col) {
          const result = [];
@@ -250,6 +281,11 @@ function dragStart() {
 
    const moves = rules[name].getMoves(rowOrigin, colOrigin);
 
+   if (name === 'p' && !rules[name].moved.has(currentPiece)) {
+      moves.push([rowOrigin - 2, colOrigin]);
+      console.log(rules[name].moved);
+   }
+
    moves.forEach(move => {
       const [row, col] = move;
       const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
@@ -289,11 +325,10 @@ function drop() {
 
    removeHints();
 
-   if (this.innerHTML) {
-      const { color } = this.firstElementChild.dataset;
+   //DISABLE DOUBLE MOVE FOR THE MOVED PAWN
 
-      if (color === colorSelf) return;
-   }
+   const { name } = currentPiece.dataset;
+   if (name === 'p') rules[name].moved.add(currentPiece);
 
    turn = colorOpponent;
 
