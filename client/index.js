@@ -195,6 +195,29 @@ const rules = {
 
          return [...diagonals, ...lines];
       }
+   },
+
+   //KING
+
+   'k': {
+      kingMoved: false,
+      isInCheck: false,
+
+      getMoves(row, col) {
+         const result = [];
+         const startRow = (row - 1 >= 0) ? row - 1 : row;
+         const startCol = (col - 1 >= 0) ? col - 1 : col;
+         const endRow = (row + 1 < 8) ? row + 1 : row;
+         const endCol = (col + 1 < 8) ? col + 1 : col;
+
+         for (let i = startRow; i <= endRow; i++) {
+            for (let j = startCol; j <= endCol; j++) {
+               result.push([i, j]);
+            }
+         }
+
+         return result;
+      }
    }
 }
 
