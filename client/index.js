@@ -27,7 +27,12 @@ let timeSelf;
 let timeOpponent;
 let timer;
 
+////////////////////////////////////////////////////////
+///RULES
+
 const rules = {
+   //PAWN
+
    'p': {
       moved: new Set(),
 
@@ -59,6 +64,8 @@ const rules = {
       }
    },
 
+   //KNIGHT
+
    'n': {
       getMoves(row, col) {
          const result = [];
@@ -75,6 +82,8 @@ const rules = {
          return result;
       }
    },
+
+   //BISHOP
 
    'b': {
       getDiag(direction = 'bottom-right', row, col) {
@@ -123,6 +132,58 @@ const rules = {
 
          return [...diag, ...antiDiag];
       }
+   },
+
+   //ROOK
+
+   'r': {
+      getMoves(row, col) {
+         let vertical = [];
+         let horizontal = [];
+         let reached = false;
+
+         for (let i = 0; i < 8; i++) {
+            if (i !== col) {
+               const cell = document.querySelector(`[data-row="${row}"][data-col="${i}"]`);
+               const child = cell.firstElementChild;
+
+               if (child) {
+                  if (!reached) horizontal = [];
+
+                  if (child.dataset.color === colorOpponent) horizontal.push([row, i]);
+
+                  if (reached) break;
+               } else {
+                  horizontal.push([row, i]);
+               }
+            } else {
+               reached = true;
+            }
+         }
+
+         reached = false;
+
+         for (let i = 0; i < 8; i++) {
+            if (i !== row) {
+               const cell = document.querySelector(`[data-row="${i}"][data-col="${col}"]`);
+               const child = cell.firstElementChild;
+
+               if (child) {
+                  if (!reached) vertical = [];
+
+                  if (child.dataset.color === colorOpponent) vertical.push([i, col]);
+
+                  if (reached) break;
+               } else {
+                  vertical.push([i, col]);
+               }
+            } else {
+               reached = true;
+            }
+         }
+
+         return [...horizontal, ...vertical];
+      }
    }
 }
 
@@ -133,12 +194,14 @@ function createBoard(cSelf, cOp) {
 
    board = [
       [`${cOp}r`, `${cOp}n`, `${cOp}b`, `${cOp}${queen}`, `${cOp}${king}`, `${cOp}b`, `${cOp}n`, `${cOp}r`],
-      [`${cOp}p`, `${cOp}p`, `${cOp}p`, `${cOp}p`, `${cOp}p`, `${cOp}p`, `${cOp}p`, `${cOp}p`],
+      // [`${cOp}p`, `${cOp}p`, `${cOp}p`, `${cOp}p`, `${cOp}p`, `${cOp}p`, `${cOp}p`, `${cOp}p`],
       ['', '', '', '', '', '', '', ''],
       ['', '', '', '', '', '', '', ''],
       ['', '', '', '', '', '', '', ''],
       ['', '', '', '', '', '', '', ''],
-      [`${cSelf}p`, `${cSelf}p`, `${cSelf}p`, `${cSelf}p`, `${cSelf}p`, `${cSelf}p`, `${cSelf}p`, `${cSelf}p`],
+      ['', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', ''],
+      // [`${cSelf}p`, `${cSelf}p`, `${cSelf}p`, `${cSelf}p`, `${cSelf}p`, `${cSelf}p`, `${cSelf}p`, `${cSelf}p`],
       [`${cSelf}r`, `${cSelf}n`, `${cSelf}b`, `${cSelf}${queen}`, `${cSelf}${king}`, `${cSelf}b`, `${cSelf}n`, `${cSelf}r`]
    ];
 }
@@ -283,7 +346,6 @@ function dragStart() {
 
    if (name === 'p' && !rules[name].moved.has(currentPiece)) {
       moves.push([rowOrigin - 2, colOrigin]);
-      console.log(rules[name].moved);
    }
 
    moves.forEach(move => {
