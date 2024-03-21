@@ -39,6 +39,8 @@ io.on('connection', socket => {
       socket.to(room).emit('move opponent', coords, piece);
    });
 
+   socket.on('checked', (room) => socket.to(room).emit('checked'));
+
    socket.on('disconnect', () => {
       console.log(`${socket.id} disconnected`);
    });

@@ -40,6 +40,10 @@
       &--capture {
          background-image: var(--color-capture);
       }
+
+      &--checked {
+         background-image: var(--color-checked);
+      }
    }
 
    &__piece {

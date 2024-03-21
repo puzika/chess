@@ -86,27 +86,20 @@ const rules = {
    //BISHOP
 
    'b': {
-      getDiag(direction = 'bottom-right', row, col) {
+      getMoves(row, col, color = colorOpponent) {
          let diag = [];
+         let antiDiag = [];
+         const topLeft = [row - Math.min(row, col), col - Math.min(row, col)];
+         const topRight = [row - Math.min(row, 7 - col), col + Math.min(row, 7 - col)];
+
          let reached = false;
-         const start = (direction === 'bottom-right') ?
-            [row - Math.min(row, col), col - Math.min(row, col)] :
-            [row - Math.min(row, 7 - col), col + Math.min(row, 7 - col)];
 
-         let [i, j] = start;
-
-         while (direction === 'bottom-right' &&
-            i < 8 && j < 8 ||
-            direction === 'bottom-left' &&
-            i < 8 && j >= 0) {
-            const cell = document.querySelector(`[data-row="${i}"][data-col="${j}"]`);
-            const child = cell.firstElementChild;
-
+         for (let [i, j] = topLeft; i < 8 && j < 8; i++, j++) {
             if (i !== row && j !== col) {
-               if (child) {
+               if (board[i][j]) {
                   if (!reached) diag = [];
 
-                  if (child.dataset.color === colorOpponent) diag.push([i, j]);
+                  if (board[i][j][0] === color) diag.push([i, j]);
 
                   if (reached) break;
                } else {
@@ -115,20 +108,25 @@ const rules = {
             } else {
                reached = true;
             }
-
-            direction === 'bottom-right' ? j++ : j--;
-            i++;
          }
 
-         return diag;
-      },
+         reached = false;
 
-      getMoves(row, col) {
-         const topLeft = [row - Math.min(row, col), col - Math.min(row, col)];
-         const topRight = [row - Math.min(row, 7 - col), col + Math.min(row, 7 - col)];
+         for (let [i, j] = topRight; i < 8 && j >= 0; i++, j--) {
+            if (i !== row && j !== col) {
+               if (board[i][j]) {
+                  if (!reached) antiDiag = [];
 
-         const diag = this.getDiag('bottom-right', row, col);
-         const antiDiag = this.getDiag('bottom-left', row, col);
+                  if (board[i][j][0] === color) antiDiag.push([i, j]);
+
+                  if (reached) break;
+               } else {
+                  antiDiag.push([i, j]);
+               }
+            } else {
+               reached = true;
+            }
+         }
 
          return [...diag, ...antiDiag];
       }
@@ -137,7 +135,7 @@ const rules = {
    //ROOK
 
    'r': {
-      getMoves(row, col) {
+      getMoves(row, col, color = colorOpponent) {
          let vertical = [];
          let horizontal = [];
          let reached = false;
@@ -150,7 +148,7 @@ const rules = {
                if (child) {
                   if (!reached) horizontal = [];
 
-                  if (child.dataset.color === colorOpponent) horizontal.push([row, i]);
+                  if (child.dataset.color === color) horizontal.push([row, i]);
 
                   if (reached) break;
                } else {
@@ -171,7 +169,7 @@ const rules = {
                if (child) {
                   if (!reached) vertical = [];
 
-                  if (child.dataset.color === colorOpponent) vertical.push([i, col]);
+                  if (child.dataset.color === color) vertical.push([i, col]);
 
                   if (reached) break;
                } else {
@@ -189,9 +187,9 @@ const rules = {
    //QUEEN
 
    'q': {
-      getMoves(row, col) {
-         const diagonals = rules.b.getMoves(row, col);
-         const lines = rules.r.getMoves(row, col);
+      getMoves(row, col, color = colorOpponent) {
+         const diagonals = rules.b.getMoves(row, col, color);
+         const lines = rules.r.getMoves(row, col, color);
 
          return [...diagonals, ...lines];
       }
@@ -201,7 +199,6 @@ const rules = {
 
    'k': {
       kingMoved: false,
-      isInCheck: false,
 
       getMoves(row, col) {
          const result = [];
@@ -218,6 +215,40 @@ const rules = {
 
          return result;
       }
+   },
+
+   getOpponentAttacks() {
+      let attacks = [];
+      const opponentPieces = [...document.querySelectorAll(`[data-color="${colorOpponent}"]`)];
+      opponentPieces.map(piece => {
+         const { name } = piece.dataset;
+         const row = +piece.parentElement.dataset.row;
+         const col = +piece.parentElement.dataset.col;
+
+         if (name === 'p') {
+            if (row + 1 < 8 && col - 1 >= 0) attacks.push([row + 1, col - 1]);
+            if (row + 1 < 8 && col + 1 < 8) attacks.push([row + 1, col + 1]);
+         } else {
+            const moves = rules[name].getMoves(row, col, colorSelf);
+            attacks.push(...moves);
+         }
+      });
+
+      return attacks;
+   },
+
+   isInCheck() {
+      const attackCells = new Set();
+      const king = document.querySelector(`[data-piece="${colorSelf}k"]`);
+      const cell = king.parentElement;
+      const row = +cell.dataset.row;
+      const col = +cell.dataset.col;
+      const opponentAttacks = this.getOpponentAttacks();
+      const isChecked = opponentAttacks.some(([x, y]) => x === row && y === col);
+
+      if (isChecked) cell.classList.add('board__cell--checked');
+
+      return isChecked;
    }
 }
 
@@ -361,6 +392,11 @@ function removeHints() {
 
    const captureCells = document.querySelectorAll('.board__cell--capture');
    captureCells.forEach(cell => cell.classList.remove('board__cell--capture'));
+
+   //REMOVE CHECKS
+
+   const checked = document.querySelector('.board__cell--checked');
+   if (checked) checked.classList.remove('board__cell--checked');
 }
 
 //DRAG AND DROP FUNCTIONS AND VARS
@@ -510,8 +546,20 @@ socket.on('move opponent', (coords, pieceName) => {
    piece.remove();
    positionFinal.append(piece);
 
+   //CHECK FOR CHECKS
+
+   const isChecked = rules.isInCheck();
+
+   if (isChecked) socket.emit('checked', room);
+
    setTimer();
 });
+
+socket.on('checked', () => {
+   const king = document.querySelector(`[data-piece="${colorOpponent}k"]`);
+   const cell = king.parentElement;
+   cell.classList.add('board__cell--checked');
+})
 
 //INITIALIZE GAME
 
