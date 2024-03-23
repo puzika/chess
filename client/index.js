@@ -26,6 +26,7 @@ let colorOpponent;
 let timeSelf;
 let timeOpponent;
 let timer;
+let inCheck = false;
 
 ////////////////////////////////////////////////////////
 ///RULES
@@ -38,15 +39,11 @@ const rules = {
 
       canCapture(row, col) {
          if (col > 0 && col < 8) {
-            const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+            const piece = board[row][col];
 
-            const child = cell.firstElementChild;
+            if (!piece) return false;
 
-            if (!child) return false;
-
-            const { color } = cell.firstElementChild.dataset;
-
-            return color === colorOpponent;
+            return piece[0] === colorOpponent;
          }
 
          return false;
@@ -54,9 +51,9 @@ const rules = {
 
       getMoves(row, col) {
          const result = [];
-         const cellFront = document.querySelector(`[data-row="${row - 1}"][data-col="${col}"]`);
+         const cellFront = board[row - 1][col];
 
-         if (!cellFront.hasChildNodes()) result.push([row - 1, col]);
+         if (!cellFront) result.push([row - 1, col]);
          if (this.canCapture(row - 1, col - 1)) result.push([row - 1, col - 1]);
          if (this.canCapture(row - 1, col + 1)) result.push([row - 1, col + 1]);
 
@@ -142,13 +139,12 @@ const rules = {
 
          for (let i = 0; i < 8; i++) {
             if (i !== col) {
-               const cell = document.querySelector(`[data-row="${row}"][data-col="${i}"]`);
-               const child = cell.firstElementChild;
+               const piece = board[row][i];
 
-               if (child) {
+               if (piece) {
                   if (!reached) horizontal = [];
 
-                  if (child.dataset.color === color) horizontal.push([row, i]);
+                  if (piece[0] === color) horizontal.push([row, i]);
 
                   if (reached) break;
                } else {
@@ -163,13 +159,12 @@ const rules = {
 
          for (let i = 0; i < 8; i++) {
             if (i !== row) {
-               const cell = document.querySelector(`[data-row="${i}"][data-col="${col}"]`);
-               const child = cell.firstElementChild;
+               const piece = board[i][col];
 
-               if (child) {
+               if (piece) {
                   if (!reached) vertical = [];
 
-                  if (child.dataset.color === color) vertical.push([i, col]);
+                  if (piece[0] === color) vertical.push([i, col]);
 
                   if (reached) break;
                } else {
@@ -209,7 +204,7 @@ const rules = {
 
          for (let i = startRow; i <= endRow; i++) {
             for (let j = startCol; j <= endCol; j++) {
-               result.push([i, j]);
+               if (board[i][j][0] !== colorSelf) result.push([i, j]);
             }
          }
 
@@ -219,34 +214,66 @@ const rules = {
 
    getOpponentAttacks() {
       let attacks = [];
-      const opponentPieces = [...document.querySelectorAll(`[data-color="${colorOpponent}"]`)];
-      opponentPieces.map(piece => {
-         const { name } = piece.dataset;
-         const row = +piece.parentElement.dataset.row;
-         const col = +piece.parentElement.dataset.col;
+      const [rows, cols] = [board.length, board[0].length];
 
-         if (name === 'p') {
-            if (row + 1 < 8 && col - 1 >= 0) attacks.push([row + 1, col - 1]);
-            if (row + 1 < 8 && col + 1 < 8) attacks.push([row + 1, col + 1]);
-         } else {
-            const moves = rules[name].getMoves(row, col, colorSelf);
-            attacks.push(...moves);
+      for (let i = 0; i < rows; i++) {
+         for (let j = 0; j < cols; j++) {
+            if (!board[i][j] || board[i][j][0] === colorSelf) continue;
+
+            const pieceName = board[i][j][1];
+
+            if (pieceName === 'p') {
+               if (i + 1 < rows && j - 1 >= 0) attacks.push([i + 1, j - 1]);
+               if (i + 1 < rows && j + 1 < cols) attacks.push([i + 1, j + 1]);
+            } else {
+               const moves = rules[pieceName].getMoves(i, j, colorSelf);
+               attacks.push(...moves);
+            }
          }
-      });
+      }
 
       return attacks;
    },
 
    isInCheck() {
       const attackCells = new Set();
+      const [rows, cols] = [8, 8];
       const king = document.querySelector(`[data-piece="${colorSelf}k"]`);
       const cell = king.parentElement;
-      const row = +cell.dataset.row;
-      const col = +cell.dataset.col;
       const opponentAttacks = this.getOpponentAttacks();
+
+      let col;
+      let row;
+
+      for (let i = 0; i < rows; i++) {
+         for (let j = 0; j < cols; j++) {
+            if (board[i][j] === `${colorSelf}k`) {
+               row = i;
+               col = j;
+            }
+         }
+      }
+
       const isChecked = opponentAttacks.some(([x, y]) => x === row && y === col);
 
       if (isChecked) cell.classList.add('board__cell--checked');
+
+      return isChecked;
+   },
+
+   willBeInCheck(rowOrigin, colOrigin, rowDest, colDest) {
+      const piece = board[rowOrigin][colOrigin];
+      const pieceDest = board[rowDest][colDest];
+
+      board[rowDest][colDest] = piece;
+      board[rowOrigin][colOrigin] = '';
+
+      const isChecked = this.isInCheck();
+
+      console.log(rowDest, colDest, isChecked);
+
+      board[rowOrigin][colOrigin] = piece;
+      board[rowDest][colDest] = pieceDest;
 
       return isChecked;
    }
@@ -395,8 +422,8 @@ function removeHints() {
 
    //REMOVE CHECKS
 
-   const checked = document.querySelector('.board__cell--checked');
-   if (checked) checked.classList.remove('board__cell--checked');
+   const checkedPiece = document.querySelector('.board__cell--checked');
+   if (checkedPiece && !inCheck) checkedPiece.classList.remove('board__cell--checked');
 }
 
 //DRAG AND DROP FUNCTIONS AND VARS
@@ -413,10 +440,16 @@ function dragStart() {
    const moves = rules[name].getMoves(rowOrigin, colOrigin);
 
    if (name === 'p' && !rules[name].moved.has(currentPiece)) {
-      moves.push([rowOrigin - 2, colOrigin]);
+      if (!board[rowOrigin - 2][colOrigin]) moves.push([rowOrigin - 2, colOrigin]);
    }
 
-   moves.forEach(move => {
+   const validMoves = moves.filter(([x, y]) => {
+      const isValid = !rules.willBeInCheck(rowOrigin, colOrigin, x, y);
+
+      return isValid;
+   });
+
+   validMoves.forEach(move => {
       const [row, col] = move;
       const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
       const hasChildren = cell.hasChildNodes();
@@ -452,6 +485,8 @@ function drop() {
       removeHints();
       return;
    }
+
+   inCheck = false;
 
    removeHints();
 
@@ -516,6 +551,8 @@ socket.on('move opponent', (coords, pieceName) => {
 
    turn = colorSelf;
 
+   //ENABLE DRAG
+
    const pieces = document.querySelectorAll('.board__piece');
 
    pieces.forEach(piece => {
@@ -523,6 +560,14 @@ socket.on('move opponent', (coords, pieceName) => {
          piece.setAttribute("draggable", "true");
       }
    });
+
+   //REMOVE CHECK FROM OPPONENT KING IF IT WAS PREVIOUSLY CHECKED
+
+   const king = document.querySelector(`[data-piece="${colorOpponent}k"]`);
+   const cell = king.parentElement;
+   cell.classList.remove('board__cell--checked');
+
+   //MOVE PIECE
 
    const positionOrigin = document.querySelector(`[data-row="${rowOrigin}"][data-col="${colOrigin}"]`);
    const positionFinal = document.querySelector(`[data-row="${rowDest}"][data-col="${colDest}"]`);
@@ -548,9 +593,9 @@ socket.on('move opponent', (coords, pieceName) => {
 
    //CHECK FOR CHECKS
 
-   const isChecked = rules.isInCheck();
+   inCheck = rules.isInCheck();
 
-   if (isChecked) socket.emit('checked', room);
+   if (inCheck) socket.emit('checked', room);
 
    setTimer();
 });
