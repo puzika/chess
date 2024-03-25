@@ -426,6 +426,25 @@ function removeHints() {
    if (checkedPiece && !inCheck) checkedPiece.classList.remove('board__cell--checked');
 }
 
+//SHOW PROMOTION BAR
+
+function showPromotion(cell = document.querySelector(`[data-row="0"][data-col="0"]`)) {
+   const pieces = ['q', 'r', 'b', 'n'];
+   let images = '';
+
+   for (const piece of pieces) {
+      images += `<image alt="${piece}" src="./assets/${colorSelf}${piece}.png">`;
+   }
+
+   const markup = `
+      <div class="promotion">
+         ${images}
+      </div>
+   `;
+
+   cell.insertAdjacentHTML('beforeend', markup);
+}
+
 //DRAG AND DROP FUNCTIONS AND VARS
 
 let currentPiece = null;

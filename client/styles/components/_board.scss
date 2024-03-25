@@ -5,6 +5,7 @@
    grid-template-columns: repeat(8, 1fr);
 
    &__cell {
+      position: relative;
       display: flex;
       justify-content: center;
       align-items: center;

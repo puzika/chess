@@ -1,0 +1,14 @@
+.promotion {
+   position: absolute;
+   width: inherit;
+   display: flex;
+   flex-direction: column;
+   background-color: rgba(250, 250, 250, 0.6);
+   top: 100%;
+   left: 0;
+   z-index: 10;
+
+   & > * {
+      width: 100%;
+   }
+}
