@@ -209,7 +209,7 @@ body {
 
 .promotion {
   position: absolute;
-  width: inherit;
+  width: 100%;
   display: flex;
   flex-direction: column;
   background-color: rgba(250, 250, 250, 0.6);
@@ -217,8 +217,9 @@ body {
   left: 0;
   z-index: 10;
 }
-.promotion > * {
+.promotion__piece {
   width: 100%;
+  cursor: pointer;
 }
 
 /*# sourceMappingURL=style.css.map */

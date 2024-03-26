@@ -38,7 +38,7 @@ const rules = {
       moved: new Set(),
 
       canCapture(row, col) {
-         if (col > 0 && col < 8) {
+         if (col >= 0 && col < 8) {
             const piece = board[row][col];
 
             if (!piece) return false;
@@ -270,8 +270,6 @@ const rules = {
 
       const isChecked = this.isInCheck();
 
-      console.log(rowDest, colDest, isChecked);
-
       board[rowOrigin][colOrigin] = piece;
       board[rowDest][colDest] = pieceDest;
 
@@ -428,12 +426,16 @@ function removeHints() {
 
 //SHOW PROMOTION BAR
 
-function showPromotion(cell = document.querySelector(`[data-row="0"][data-col="0"]`)) {
+function showPromotion(cell) {
    const pieces = ['q', 'r', 'b', 'n'];
    let images = '';
 
    for (const piece of pieces) {
-      images += `<image alt="${piece}" src="./assets/${colorSelf}${piece}.png">`;
+      images += `<image alt="${piece}" 
+         class="promotion__piece" 
+         data-piece="${colorSelf}${piece}" 
+         src="./assets/${colorSelf}${piece}.png">
+      `;
    }
 
    const markup = `
@@ -450,6 +452,7 @@ function showPromotion(cell = document.querySelector(`[data-row="0"][data-col="0
 let currentPiece = null;
 
 function dragStart() {
+   console.log(this);
    currentPiece = this;
    const cell = currentPiece.parentElement;
    const { name } = currentPiece.dataset;
@@ -570,16 +573,6 @@ socket.on('move opponent', (coords, pieceName) => {
 
    turn = colorSelf;
 
-   //ENABLE DRAG
-
-   const pieces = document.querySelectorAll('.board__piece');
-
-   pieces.forEach(piece => {
-      if (piece.dataset.color === colorSelf) {
-         piece.setAttribute("draggable", "true");
-      }
-   });
-
    //REMOVE CHECK FROM OPPONENT KING IF IT WAS PREVIOUSLY CHECKED
 
    const king = document.querySelector(`[data-piece="${colorOpponent}k"]`);
@@ -617,6 +610,107 @@ socket.on('move opponent', (coords, pieceName) => {
    if (inCheck) socket.emit('checked', room);
 
    setTimer();
+
+   if (pieceName[1] === 'p' && rowDest === 7) {
+      turn = colorOpponent;
+      setTimer();
+      socket.emit('promote', room, 7 - colDest);
+   } else {
+      //ENABLE DRAG
+
+      const pieces = document.querySelectorAll('.board__piece');
+
+      pieces.forEach(piece => {
+         if (piece.dataset.color === colorSelf) {
+            piece.setAttribute("draggable", "true");
+         }
+      });
+   }
+});
+
+socket.on('promoting', col => {
+   turn = colorSelf;
+   setTimer();
+
+   const cell = document.querySelector(`[data-row="0"][data-col="${col}"]`);
+
+   showPromotion(cell);
+
+   const promotionBar = document.querySelector('.promotion');
+
+   promotionBar.addEventListener('click', e => {
+      const { target } = e;
+
+      if (!target.classList.contains('promotion__piece')) return;
+
+      const { piece } = target.dataset;
+
+      board[0][col] = piece;
+
+      const markup = `
+         <img draggable="false"
+            alt="${piece}"
+            class="board__piece"
+            data-color="${piece[0]}"
+            data-name="${piece[1]}"
+            data-piece="${piece}"
+            src="./assets/${piece}.png">
+      `;
+
+      promotionBar.remove();
+
+      cell.firstElementChild.remove();
+
+      cell.insertAdjacentHTML('beforeend', markup);
+
+      cell.firstElementChild.addEventListener('dragstart', dragStart);
+
+      console.log(cell.firstElementChild);
+
+      turn = colorOpponent;
+      setTimer();
+
+      socket.emit('promoted', room, piece, 7 - col);
+   });
+});
+
+socket.on('promoted', (piece, col) => {
+   turn = colorSelf;
+   setTimer();
+
+   board[7][col] = piece;
+
+   const cell = document.querySelector(`[data-row="7"][data-col="${col}"]`);
+
+   const markup = `
+         <img draggable="false"
+            alt="${piece}"
+            class="board__piece"
+            data-color="${piece[0]}"
+            data-name="${piece[1]}"
+            data-piece="${piece}"
+            src="./assets/${piece}.png">
+      `;
+
+   cell.firstElementChild.remove();
+
+   cell.insertAdjacentHTML('beforeend', markup);
+
+   //ENABLE DRAG
+
+   const pieces = document.querySelectorAll('.board__piece');
+
+   pieces.forEach(piece => {
+      if (piece.dataset.color === colorSelf) {
+         piece.setAttribute("draggable", "true");
+      }
+   });
+
+   //CHECK FOR CHECKS
+
+   inCheck = rules.isInCheck();
+
+   if (inCheck) socket.emit('checked', room);
 });
 
 socket.on('checked', () => {

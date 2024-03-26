@@ -41,6 +41,10 @@ io.on('connection', socket => {
 
    socket.on('checked', (room) => socket.to(room).emit('checked'));
 
+   socket.on('promote', (room, col) => socket.to(room).emit('promoting', col));
+
+   socket.on('promoted', (room, piece, col) => socket.to(room).emit('promoted', piece, col));
+
    socket.on('disconnect', () => {
       console.log(`${socket.id} disconnected`);
    });
