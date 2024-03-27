@@ -452,7 +452,6 @@ function showPromotion(cell) {
 let currentPiece = null;
 
 function dragStart() {
-   console.log(this);
    currentPiece = this;
    const cell = currentPiece.parentElement;
    const { name } = currentPiece.dataset;
@@ -474,7 +473,7 @@ function dragStart() {
    validMoves.forEach(move => {
       const [row, col] = move;
       const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-      const hasChildren = cell.hasChildNodes();
+      const hasChildren = cell.firstElementChild;
 
       if (!hasChildren) cell.classList.add('board__cell--move');
       else {
@@ -538,7 +537,7 @@ function drop() {
    board[rowOrigin][colOrigin] = '';
    board[rowDest][colDest] = piece;
 
-   if (this.hasChildNodes()) {
+   if (this.firstElementChild) {
       const child = this.firstElementChild;
       const { piece } = child.dataset;
 
@@ -588,7 +587,7 @@ socket.on('move opponent', (coords, pieceName) => {
    board[rowOrigin][colOrigin] = '';
    board[rowDest][colDest] = pieceName;
 
-   if (positionFinal.hasChildNodes()) {
+   if (positionFinal.firstElementChild) {
       const child = positionFinal.firstElementChild;
       const { piece } = child.dataset;
 
@@ -664,8 +663,6 @@ socket.on('promoting', col => {
       cell.insertAdjacentHTML('beforeend', markup);
 
       cell.firstElementChild.addEventListener('dragstart', dragStart);
-
-      console.log(cell.firstElementChild);
 
       turn = colorOpponent;
       setTimer();
