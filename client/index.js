@@ -195,7 +195,7 @@ const rules = {
    'k': {
       kingMoved: false,
 
-      getMoves(row, col) {
+      getMoves(row, col, color = colorOpponent) {
          const result = [];
          const startRow = (row - 1 >= 0) ? row - 1 : row;
          const startCol = (col - 1 >= 0) ? col - 1 : col;
@@ -204,7 +204,8 @@ const rules = {
 
          for (let i = startRow; i <= endRow; i++) {
             for (let j = startCol; j <= endCol; j++) {
-               if (board[i][j][0] !== colorSelf) result.push([i, j]);
+               if (!(row === i && col === j) &&
+                  ((board[i][j] === '') || (board[i][j][0] === color))) result.push([i, j]);
             }
          }
 
