@@ -1,3 +1,4 @@
+import { io } from "https://cdn.socket.io/4.7.5/socket.io.esm.min.js";
 const socket = io('http://localhost:3000');
 
 const grid = document.querySelector('.board');
@@ -92,7 +93,7 @@ const rules = {
          let reached = false;
 
          for (let [i, j] = topLeft; i < 8 && j < 8; i++, j++) {
-            if (i !== row && j !== col) {
+            if (!(i === row && j === col)) {
                if (board[i][j]) {
                   if (!reached) diag = [];
 
@@ -110,7 +111,7 @@ const rules = {
          reached = false;
 
          for (let [i, j] = topRight; i < 8 && j >= 0; i++, j--) {
-            if (i !== row && j !== col) {
+            if (!(i === row && j === col)) {
                if (board[i][j]) {
                   if (!reached) antiDiag = [];
 
@@ -276,6 +277,46 @@ const rules = {
 
       return isChecked;
    }
+}
+
+const legalMoves = new Map();
+
+function hasMoves() {
+   if (legalMoves.size === 0) return false;
+
+   for (const [piece, moves] of legalMoves) {
+      if (moves.length > 0) return true;
+   }
+
+   return false;
+}
+
+function getValidMoves() {
+   const [rows, cols] = [8, 8];
+
+   for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+         if (board[i][j] && board[i][j][0] === colorSelf) {
+            const name = board[i][j][1];
+            const key = i * cols + j;
+            const moves = rules[name].getMoves(i, j);
+
+            if (name === 'p' &&
+               i === rows - 2 &&
+               board[i - 2][j] === '') moves.push([i - 2, j]);
+
+            const validMoves = moves.filter(([x, y]) => {
+               const isValid = !rules.willBeInCheck(i, j, x, y);
+
+               return isValid;
+            });
+
+            legalMoves.set(key, validMoves);
+         }
+      }
+   }
+
+   if (!hasMoves()) console.log('has no moves');
 }
 
 function createBoard(cSelf, cOp) {
@@ -455,21 +496,12 @@ let currentPiece = null;
 function dragStart() {
    currentPiece = this;
    const cell = currentPiece.parentElement;
-   const { name } = currentPiece.dataset;
    const rowOrigin = +cell.dataset.row;
    const colOrigin = +cell.dataset.col;
+   const key = rowOrigin * 8 + colOrigin;
 
-   const moves = rules[name].getMoves(rowOrigin, colOrigin);
-
-   if (name === 'p' && !rules[name].moved.has(currentPiece)) {
-      if (!board[rowOrigin - 2][colOrigin]) moves.push([rowOrigin - 2, colOrigin]);
-   }
-
-   const validMoves = moves.filter(([x, y]) => {
-      const isValid = !rules.willBeInCheck(rowOrigin, colOrigin, x, y);
-
-      return isValid;
-   });
+   const validMoves = legalMoves.get(key);
+   console.log(legalMoves);
 
    validMoves.forEach(move => {
       const [row, col] = move;
@@ -511,11 +543,6 @@ function drop() {
    inCheck = false;
 
    removeHints();
-
-   //DISABLE DOUBLE MOVE FOR THE MOVED PAWN
-
-   const { name } = currentPiece.dataset;
-   if (name === 'p') rules[name].moved.add(currentPiece);
 
    turn = colorOpponent;
 
@@ -625,6 +652,8 @@ socket.on('move opponent', (coords, pieceName) => {
             piece.setAttribute("draggable", "true");
          }
       });
+
+      getValidMoves();
    }
 });
 
@@ -763,4 +792,6 @@ socket.on('game ready', roomInfo => {
       cell.addEventListener('dragleave', dragLeave);
       cell.addEventListener('drop', drop);
    }
+
+   if (colorSelf === turn) getValidMoves();
 });
