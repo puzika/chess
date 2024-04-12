@@ -10,10 +10,6 @@ const rooms = new Map();
 
 app.use(express.static('../client'));
 
-app.get("*", (req, res) => {
-   res.sendFile('/client/index.html');
-});
-
 io.on('connection', socket => {
    console.log(`${socket.id} connected`);
 

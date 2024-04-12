@@ -67,15 +67,16 @@ const rules = {
    'n': {
       getMoves(row, col) {
          const result = [];
+         const possibleMoves = [
+            [row - 1, col + 2], [row - 1, col - 2], [row + 1, col + 2], [row + 1, col - 2],
+            [row - 2, col + 1], [row - 2, col - 1], [row + 2, col + 1], [row + 2, col - 1]
+         ];
 
-         if (row - 1 >= 0 && col + 2 <= 7) result.push([row - 1, col + 2]);
-         if (row - 1 >= 0 && col - 2 >= 0) result.push([row - 1, col - 2]);
-         if (row + 1 <= 7 && col + 2 <= 7) result.push([row + 1, col + 2]);
-         if (row + 1 <= 7 && col - 2 >= 0) result.push([row + 1, col - 2]);
-         if (row - 2 >= 0 && col + 1 <= 7) result.push([row - 2, col + 1]);
-         if (row - 2 >= 0 && col - 1 >= 0) result.push([row - 2, col - 1]);
-         if (row + 2 <= 7 && col + 1 <= 7) result.push([row + 2, col + 1]);
-         if (row + 2 <= 7 && col - 1 >= 0) result.push([row + 2, col - 1]);
+         for (const [row, col] of possibleMoves) {
+            if ((row >= 0 && row <= 7) &&
+               (col >= 0 && col <= 7) &&
+               board[row][col][0] !== colorSelf) result.push([row, col]);
+         }
 
          return result;
       }
@@ -296,14 +297,16 @@ function getValidMoves() {
 
    for (let i = 0; i < rows; i++) {
       for (let j = 0; j < cols; j++) {
-         if (board[i][j] && board[i][j][0] === colorSelf) {
+         const key = i * cols + j;
+
+         if (board[i][j][0] === colorSelf) {
             const name = board[i][j][1];
-            const key = i * cols + j;
             const moves = rules[name].getMoves(i, j);
 
             if (name === 'p' &&
                i === rows - 2 &&
-               board[i - 2][j] === '') moves.push([i - 2, j]);
+               board[i - 2][j] === '' &&
+               board[i - 1][j] === '') moves.push([i - 2, j]);
 
             const validMoves = moves.filter(([x, y]) => {
                const isValid = !rules.willBeInCheck(i, j, x, y);
@@ -311,12 +314,19 @@ function getValidMoves() {
                return isValid;
             });
 
+            console.log(name, validMoves);
+
             legalMoves.set(key, validMoves);
+         } else {
+            legalMoves.set(key, []);
          }
       }
    }
 
-   if (!hasMoves()) console.log('has no moves');
+   if (!hasMoves()) {
+      if (inCheck) console.log('checkmate');
+      else console.log('stalemate');
+   }
 }
 
 function createBoard(cSelf, cOp) {
@@ -429,6 +439,7 @@ function setTimer() {
 
    timer = setInterval(() => {
       let time;
+      let currentTimer;
 
       if (turn === colorSelf) {
          currentTimer = timerSelf;
