@@ -313,9 +313,6 @@ function getValidMoves() {
 
                return isValid;
             });
-
-            console.log(name, validMoves);
-
             legalMoves.set(key, validMoves);
          } else {
             legalMoves.set(key, []);
@@ -512,7 +509,6 @@ function dragStart() {
    const key = rowOrigin * 8 + colOrigin;
 
    const validMoves = legalMoves.get(key);
-   console.log(legalMoves);
 
    validMoves.forEach(move => {
       const [row, col] = move;
