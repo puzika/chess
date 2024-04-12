@@ -259,8 +259,6 @@ const rules = {
 
       const isChecked = opponentAttacks.some(([x, y]) => x === row && y === col);
 
-      if (isChecked) cell.classList.add('board__cell--checked');
-
       return isChecked;
    },
 
@@ -313,6 +311,7 @@ function getValidMoves() {
 
                return isValid;
             });
+
             legalMoves.set(key, validMoves);
          } else {
             legalMoves.set(key, []);
@@ -609,8 +608,8 @@ socket.on('move opponent', (coords, pieceName) => {
 
    //REMOVE CHECK FROM OPPONENT KING IF IT WAS PREVIOUSLY CHECKED
 
-   const king = document.querySelector(`[data-piece="${colorOpponent}k"]`);
-   const cell = king.parentElement;
+   const kingOpponent = document.querySelector(`[data-piece="${colorOpponent}k"]`);
+   const cell = kingOpponent.parentElement;
    cell.classList.remove('board__cell--checked');
 
    //MOVE PIECE
@@ -641,7 +640,11 @@ socket.on('move opponent', (coords, pieceName) => {
 
    inCheck = rules.isInCheck();
 
-   if (inCheck) socket.emit('checked', room);
+   if (inCheck) {
+      const kingSelf = document.querySelector(`[data-piece="${colorSelf}k"]`);
+      kingSelf.parentElement.classList.add('board__cell--checked');
+      socket.emit('checked', room);
+   }
 
    setTimer();
 
