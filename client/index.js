@@ -16,6 +16,9 @@ const nameSelf = document.querySelector('.info__name--self');
 const nameOpponent = document.querySelector('.info__name--opponent');
 const capturedSelf = document.querySelector('.captured--self');
 const capturedOpponent = document.querySelector('.captured--opponent');
+const result = document.querySelector('.result');
+const resultWindow = document.querySelector('.result__window');
+const resultMessage = document.querySelector('.result__message');
 
 const INTERVAL = 1000;
 
@@ -278,6 +281,17 @@ const rules = {
    }
 }
 
+function showResult(message) {
+   result.classList.remove('result--hidden');
+   resultWindow.classList.remove('result__window--hidden');
+   resultMessage.textContent = `${message}`;
+}
+
+function hideResult() {
+   result.classList.add('result--hidden');
+   resultWindow.classList.add('result__window--hidden');
+}
+
 const legalMoves = new Map();
 
 function hasMoves() {
@@ -320,8 +334,19 @@ function getValidMoves() {
    }
 
    if (!hasMoves()) {
-      if (inCheck) console.log('checkmate');
-      else console.log('stalemate');
+      let message;
+
+      if (inCheck) {
+         const winner = colorOpponent === 'w' ? 'White' : 'Black';
+         message = `${winner} is victorcious`;
+         showResult(message);
+      } else {
+         message = 'Stalemate';
+         showResult(message);
+      }
+
+      socket.emit('game over', room, message);
+      clearInterval(timer);
    }
 }
 
@@ -807,3 +832,8 @@ socket.on('game ready', roomInfo => {
 
    if (colorSelf === turn) getValidMoves();
 });
+
+socket.on('game over', message => {
+   showResult(message);
+   clearInterval(timer);
+})

@@ -45,6 +45,8 @@ io.on('connection', socket => {
 
    socket.on('promoted', (room, piece, col) => socket.to(room).emit('promoted', piece, col));
 
+   socket.on('game over', (room, message) => socket.to(room).emit('game over', message));
+
    socket.on('disconnect', () => {
       console.log(`${socket.id} disconnected`);
    });
