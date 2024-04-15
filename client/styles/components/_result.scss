@@ -36,4 +36,12 @@
          transform: translate(-50%, -50%) scale(1.2);
       }
    }
+
+   &__restart {
+      font-size: 2rem;
+      border-radius: .5rem;
+      padding: 1rem 2rem;
+      margin-top: 2.5rem;
+      cursor: pointer;
+   }
 }

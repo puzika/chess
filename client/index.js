@@ -20,6 +20,8 @@ const result = document.querySelector('.result');
 const resultWindow = document.querySelector('.result__window');
 const resultMessage = document.querySelector('.result__message');
 
+const move = new Audio('./assets/move.mp3');
+
 const INTERVAL = 1000;
 
 let board;
@@ -621,6 +623,8 @@ function drop() {
 
    turn = colorOpponent;
    setTimer();
+
+   move.play();
 }
 
 //DISPLAY MOVE ON OPPONENTS BOARD
@@ -668,6 +672,8 @@ socket.on('move opponent', (coords, pieceName) => {
       socket.emit('checked', room);
    }
 
+   move.play();
+
    if (pieceName[1] === 'p' && rowDest === 7) {
       socket.emit('promote', room, 7 - colDest);
    } else {
@@ -683,8 +689,10 @@ socket.on('move opponent', (coords, pieceName) => {
 
       getValidMoves();
 
-      turn = colorSelf;
-      setTimer();
+      if (hasMoves()) {
+         turn = colorSelf;
+         setTimer();
+      }
    }
 });
 
