@@ -550,8 +550,6 @@ function drop() {
 
    removeHints();
 
-   turn = colorOpponent;
-
    //DISABLE DRAG
 
    const pieces = document.querySelectorAll('.board__piece');
@@ -596,6 +594,7 @@ function drop() {
    //coords on opponents board are 7 - row, col where 7 = rows - 1
    socket.emit('move', room, coords, piece);
 
+   turn = colorOpponent;
    setTimer();
 }
 
@@ -603,8 +602,6 @@ function drop() {
 
 socket.on('move opponent', (coords, pieceName) => {
    const { rowOrigin, rowDest, colOrigin, colDest } = coords;
-
-   turn = colorSelf;
 
    //REMOVE CHECK FROM OPPONENT KING IF IT WAS PREVIOUSLY CHECKED
 
@@ -646,11 +643,7 @@ socket.on('move opponent', (coords, pieceName) => {
       socket.emit('checked', room);
    }
 
-   setTimer();
-
    if (pieceName[1] === 'p' && rowDest === 7) {
-      turn = colorOpponent;
-      setTimer();
       socket.emit('promote', room, 7 - colDest);
    } else {
       //ENABLE DRAG
@@ -664,6 +657,9 @@ socket.on('move opponent', (coords, pieceName) => {
       });
 
       getValidMoves();
+
+      turn = colorSelf;
+      setTimer();
    }
 });
 
@@ -747,7 +743,13 @@ socket.on('promoted', (piece, col) => {
 
    inCheck = rules.isInCheck();
 
-   if (inCheck) socket.emit('checked', room);
+   if (inCheck) {
+      const kingSelf = document.querySelector(`[data-piece="${colorSelf}k"]`);
+      kingSelf.parentElement.classList.add('board__cell--checked');
+      socket.emit('checked', room);
+   }
+
+   getValidMoves();
 });
 
 socket.on('checked', () => {
