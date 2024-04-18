@@ -70,7 +70,7 @@ const rules = {
    //KNIGHT
 
    'n': {
-      getMoves(row, col) {
+      getMoves(row, col, color = colorOpponent) {
          const result = [];
          const possibleMoves = [
             [row - 1, col + 2], [row - 1, col - 2], [row + 1, col + 2], [row + 1, col - 2],
@@ -80,7 +80,7 @@ const rules = {
          for (const [row, col] of possibleMoves) {
             if ((row >= 0 && row <= 7) &&
                (col >= 0 && col <= 7) &&
-               board[row][col][0] !== colorSelf) result.push([row, col]);
+               (!board[row][col] || board[row][col] && board[row][col][0] === color)) result.push([row, col]);
          }
 
          return result;
