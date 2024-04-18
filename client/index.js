@@ -466,12 +466,36 @@ function setTimer() {
 
       if (turn === colorSelf) {
          currentTimer = timerSelf;
-         time = timeSelf;
          timeSelf--;
+         time = timeSelf;
       } else {
          currentTimer = timerOpponent;
-         time = timeOpponent;
          timeOpponent--;
+         time = timeOpponent;
+      }
+
+      if (time < 0) {
+         const winnerColor = timeSelf < 0 ? colorOpponent : colorSelf;
+         const [rows, cols] = [8, 8];
+         let hasWinner = false;
+         let message;
+
+         for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+               if (board[i][j][0] === winnerColor && board[i][j][1] !== 'k') hasWinner = true;
+            }
+         }
+
+         if (hasWinner) {
+            const winner = winnerColor === 'w' ? 'White' : 'Black';
+            message = `${winner} is victorious`;
+         } else {
+            message = `Draw`;
+         }
+
+         showResult(message);
+         clearTimeout(timer);
+         return;
       }
 
       const minutes = `${Math.floor(time / 60)}`.padStart(2, '0');
