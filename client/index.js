@@ -33,6 +33,7 @@ let timeSelf;
 let timeOpponent;
 let timer;
 let inCheck = false;
+let peacesLoaded = 0;
 
 ////////////////////////////////////////////////////////
 ///RULES
@@ -42,6 +43,7 @@ const rules = {
 
    'p': {
       moved: new Set(),
+      enPassant: new Set(),
 
       canCapture(row, col) {
          if (col >= 0 && col < 8) {
@@ -317,10 +319,17 @@ function getValidMoves() {
             const name = board[i][j][1];
             const moves = rules[name].getMoves(i, j);
 
-            if (name === 'p' &&
-               i === rows - 2 &&
-               board[i - 2][j] === '' &&
-               board[i - 1][j] === '') moves.push([i - 2, j]);
+            if (name === 'p') {
+               if (i === rows - 2 &&
+                  board[i - 2][j] === '' &&
+                  board[i - 1][j] === '') moves.push([i - 2, j]);
+
+               if (board[i][j + 1] === `${colorOpponent}p` &&
+                  rules.p.enPassant.has(i * cols + j + 1)) moves.push([i - 1, j + 1]);
+
+               if (board[i][j - 1] === `${colorOpponent}p` &&
+                  rules.p.enPassant.has(i * cols + j - 1)) moves.push([i - 1, j - 1]);
+            };
 
             const validMoves = moves.filter(([x, y]) => {
                const isValid = !rules.willBeInCheck(i, j, x, y);
@@ -392,6 +401,14 @@ function initializeBoard() {
          `;
 
          grid.insertAdjacentHTML('beforeend', markup);
+
+         grid.lastElementChild.firstElementChild?.addEventListener('load', () => {
+            peacesLoaded++;
+
+            if (peacesLoaded === 32) {
+               setTimer();
+            }
+         })
       }
    }
 }
@@ -698,6 +715,14 @@ socket.on('move opponent', (coords, pieceName) => {
 
    move.play();
 
+   //CHECK FOR ENPASSANTS
+
+   rules.p.enPassant.clear();
+
+   if (pieceName[1] === 'p' && rowOrigin === 1 && rowDest === 3) {
+      rules.p.enPassant.add(rowDest * 8 + colDest);
+   }
+
    if (pieceName[1] === 'p' && rowDest === 7) {
       socket.emit('promote', room, 7 - colDest);
    } else {
@@ -839,7 +864,6 @@ socket.on('game ready', roomInfo => {
 
    timerOpponent.textContent = `${timeOpponent / 60}:00`;
    timerSelf.textContent = `${timeSelf / 60}:00`;
-   setTimer();
 
    //INITIALIZE BOARD
 
