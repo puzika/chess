@@ -42,7 +42,6 @@ const rules = {
    //PAWN
 
    'p': {
-      moved: new Set(),
       enPassant: new Set(),
 
       canCapture(row, col) {
@@ -647,6 +646,11 @@ function drop() {
 
       capturedSelf.insertAdjacentHTML('beforeend', markup);
       child.remove();
+   } else if (piece[1] === 'p' && colDest !== colOrigin) {
+      board[rowOrigin][colDest] = '';
+      const capturedCell = document.querySelector(`[data-row="${rowOrigin}"][data-col="${colDest}"]`);
+      const capturedPiece = capturedCell.firstElementChild;
+      capturedPiece.remove();
    }
 
    currentPiece.remove();
@@ -698,6 +702,11 @@ socket.on('move opponent', (coords, pieceName) => {
 
       capturedOpponent.insertAdjacentHTML('beforeend', markup);
       child.remove();
+   } else if (pieceName[1] === 'p' && colDest !== colOrigin) {
+      board[rowOrigin][colDest] = '';
+      const capturedCell = document.querySelector(`[data-row="${rowOrigin}"][data-col="${colDest}"]`);
+      const capturedPiece = capturedCell.firstElementChild;
+      capturedPiece.remove();
    }
 
    piece.remove();
