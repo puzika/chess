@@ -336,6 +336,23 @@ function getValidMoves() {
                return isValid;
             });
 
+            if (name === 'k' && !rules.k.kingMoved) {
+               for (const [row, col] of validMoves) {
+                  if (row === i &&
+                     col === j + 1 &&
+                     board[row][j + 1] === '' &&
+                     board[row][j + 2] === '' &&
+                     !rules.willBeInCheck(i, j, i, j + 2)) validMoves.push([i, j + 2]);
+
+                  if (row === i &&
+                     col === j - 1 &&
+                     board[row][j - 1] === '' &&
+                     board[row][j - 2] === '' &&
+                     board[row][j - 3] === '' &&
+                     !rules.willBeInCheck(i, j, i, j - 2)) validMoves.push([i, j - 2]);
+               }
+            }
+
             legalMoves.set(key, validMoves);
          } else {
             legalMoves.set(key, []);
@@ -635,6 +652,10 @@ function drop() {
 
    board[rowOrigin][colOrigin] = '';
    board[rowDest][colDest] = piece;
+
+   //DISABLE CASTLING IF KING MOVED
+
+   if (piece[1] === 'k') rules.k.kingMoved = true;
 
    if (this.firstElementChild) {
       const child = this.firstElementChild;
