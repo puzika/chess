@@ -258,7 +258,12 @@ body {
   opacity: 0;
   transform: translate(-50%, -50%) scale(1.2);
 }
-.result__restart {
+.result__options {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+}
+.result__btn {
   font-size: 2rem;
   border-radius: 0.5rem;
   padding: 1rem 2rem;

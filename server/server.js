@@ -47,6 +47,13 @@ io.on('connection', socket => {
 
    socket.on('game over', (room, message) => socket.to(room).emit('game over', message));
 
+   socket.on('leave', room => {
+      socket.to(room).emit('opponent left');
+      io.in(room).socketsLeave(room);
+   });
+
+   socket.on('rematch', room => socket.to(room).emit('rematch request'));
+
    socket.on('disconnect', () => {
       console.log(`${socket.id} disconnected`);
    });

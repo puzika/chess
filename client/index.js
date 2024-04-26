@@ -19,6 +19,8 @@ const capturedOpponent = document.querySelector('.captured--opponent');
 const result = document.querySelector('.result');
 const resultWindow = document.querySelector('.result__window');
 const resultMessage = document.querySelector('.result__message');
+const restart = document.querySelector('.result__btn--restart');
+const leave = document.querySelector('.result__btn--leave');
 
 const move = new Audio('./assets/move.mp3');
 
@@ -991,4 +993,32 @@ socket.on('game ready', roomInfo => {
 socket.on('game over', message => {
    showResult(message);
    clearInterval(timer);
-})
+});
+
+function reset() {
+   hideResult();
+   grid.innerHTML = '';
+   capturedSelf.innerHTML = '';
+   capturedOpponent.innerHTML = '';
+   timerSelf.innerHTML = '';
+   timerOpponent.innerHTML = '';
+   nameSelf.innerHTML = '';
+   nameOpponent.innerHTML = '';
+   peacesLoaded = 0;
+   turn = 'w';
+   inCheck = false;
+   cover.classList.remove('cover--hidden');
+}
+
+leave.addEventListener('click', () => {
+   reset();
+   socket.emit('leave', room);
+});
+
+socket.on('opponent left', reset);
+
+restart.addEventListener('click', () => {
+   socket.emit('rematch', room);
+   hideResult();
+   showLoader("Waiting for opponent's response");
+});
