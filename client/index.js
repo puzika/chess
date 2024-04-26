@@ -140,6 +140,9 @@ const rules = {
    //ROOK
 
    'r': {
+      rookMovedRightSide: false,
+      rookMovedLeftSide: false,
+
       getMoves(row, col, color = colorOpponent) {
          let vertical = [];
          let horizontal = [];
@@ -336,20 +339,29 @@ function getValidMoves() {
                return isValid;
             });
 
-            if (name === 'k' && !rules.k.kingMoved) {
+            if (name === 'k' && !rules.k.kingMoved && !inCheck) {
                for (const [row, col] of validMoves) {
                   if (row === i &&
                      col === j + 1 &&
                      board[row][j + 1] === '' &&
                      board[row][j + 2] === '' &&
-                     !rules.willBeInCheck(i, j, i, j + 2)) validMoves.push([i, j + 2]);
+                     board[row][7] === `${colorSelf}r` &&
+                     !rules.r.rookMovedRightSide &&
+                     !rules.willBeInCheck(i, j, i, j + 2)) {
+                     if (colorSelf === 'w') validMoves.push([i, j + 2]);
+                     else if (board[row][j + 3] === '') validMoves.push([i, j + 2]);
+                  }
 
                   if (row === i &&
                      col === j - 1 &&
                      board[row][j - 1] === '' &&
                      board[row][j - 2] === '' &&
-                     board[row][j - 3] === '' &&
-                     !rules.willBeInCheck(i, j, i, j - 2)) validMoves.push([i, j - 2]);
+                     board[row][0] === `${colorSelf}r` &&
+                     !rules.r.rookMovedLeftSide &&
+                     !rules.willBeInCheck(i, j, i, j - 2)) {
+                     if (colorSelf === 'b') validMoves.push([i, j - 2]);
+                     else if (board[row][j - 3] === '') validMoves.push([i, j - 2]);
+                  }
                }
             }
 
@@ -653,9 +665,42 @@ function drop() {
    board[rowOrigin][colOrigin] = '';
    board[rowDest][colDest] = piece;
 
-   //DISABLE CASTLING IF KING MOVED
+   if (piece[1] === 'k') {
+      //DISABLE CASTLING IF KING MOVED
 
-   if (piece[1] === 'k') rules.k.kingMoved = true;
+      rules.k.kingMoved = true;
+
+      //IF CASTLING MOVE ROOK 
+
+      const castle = colDest - colOrigin;
+
+      //RIGHTSIDE CASTLING
+
+      if (castle === 2) {
+         board[rowDest][colOrigin + 1] = `${colorSelf}r`;
+         board[rowDest][7] = '';
+         const rook = document.querySelector(`[data-row="${rowDest}"][data-col="${7}"]`).firstElementChild;
+         rook.remove();
+         document.querySelector(`[data-row="${rowDest}"][data-col="${colOrigin + 1}"]`).append(rook);
+      }
+
+      //LEFTSIDE CASTLING
+
+      if (castle === -2) {
+         board[rowDest][colOrigin - 1] = `${colorSelf}r`;
+         board[rowDest][0] = '';
+         const rook = document.querySelector(`[data-row="${rowDest}"][data-col="${0}"]`).firstElementChild;
+         rook.remove();
+         document.querySelector(`[data-row="${rowDest}"][data-col="${colOrigin - 1}"]`).append(rook);
+      }
+   }
+
+   if (piece[1] === 'r' && rowOrigin === 7) {
+      //DISABLE CASTLING IF KING MOVED
+
+      if (colOrigin === 0) rules.r.rookMovedLeftSide = true;
+      if (colOrigin === 7) rules.r.rookMovedRightSide = true;
+   }
 
    if (this.firstElementChild) {
       const child = this.firstElementChild;
@@ -712,6 +757,30 @@ socket.on('move opponent', (coords, pieceName) => {
 
    board[rowOrigin][colOrigin] = '';
    board[rowDest][colDest] = pieceName;
+
+   if (pieceName[1] === 'k') {
+      const castle = colDest - colOrigin;
+
+      //RIGHTSIDE CASTLING
+
+      if (castle === 2) {
+         board[rowDest][colOrigin + 1] = `${colorOpponent}r`;
+         board[rowDest][7] = '';
+         const rook = document.querySelector(`[data-row="${rowDest}"][data-col="${7}"]`).firstElementChild;
+         rook.remove();
+         document.querySelector(`[data-row="${rowDest}"][data-col="${colOrigin + 1}"]`).append(rook);
+      }
+
+      //LEFTSIDE CASTLING
+
+      if (castle === -2) {
+         board[rowDest][colOrigin - 1] = `${colorOpponent}r`;
+         board[rowDest][0] = '';
+         const rook = document.querySelector(`[data-row="${rowDest}"][data-col="${0}"]`).firstElementChild;
+         rook.remove();
+         document.querySelector(`[data-row="${rowDest}"][data-col="${colOrigin - 1}"]`).append(rook);
+      }
+   }
 
    if (positionFinal.firstElementChild) {
       const child = positionFinal.firstElementChild;
