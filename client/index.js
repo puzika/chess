@@ -16,11 +16,15 @@ const nameSelf = document.querySelector('.info__name--self');
 const nameOpponent = document.querySelector('.info__name--opponent');
 const capturedSelf = document.querySelector('.captured--self');
 const capturedOpponent = document.querySelector('.captured--opponent');
-const result = document.querySelector('.result');
-const resultWindow = document.querySelector('.result__window');
-const resultMessage = document.querySelector('.result__message');
-const restart = document.querySelector('.result__btn--restart');
-const leave = document.querySelector('.result__btn--leave');
+const result = document.querySelector('.message--result');
+const resultWindow = document.querySelector('.message__window--result');
+const resultMessage = document.querySelector('.message__text');
+const restart = document.querySelector('.message__btn--restart');
+const leave = document.querySelector('.message__btn--leave');
+const request = document.querySelector('.message--request');
+const requestWindow = document.querySelector('.message__window--request');
+const accept = document.querySelector('.message__btn--accept');
+const decline = document.querySelector('.message__btn--decline');
 
 const move = new Audio('./assets/move.mp3');
 
@@ -36,6 +40,7 @@ let timeOpponent;
 let timer;
 let inCheck = false;
 let peacesLoaded = 0;
+let roomData;
 
 ////////////////////////////////////////////////////////
 ///RULES
@@ -290,14 +295,24 @@ const rules = {
 }
 
 function showResult(message) {
-   result.classList.remove('result--hidden');
-   resultWindow.classList.remove('result__window--hidden');
+   result.classList.remove('message--hidden');
+   resultWindow.classList.remove('message__window--hidden');
    resultMessage.textContent = `${message}`;
 }
 
 function hideResult() {
-   result.classList.add('result--hidden');
-   resultWindow.classList.add('result__window--hidden');
+   result.classList.add('message--hidden');
+   resultWindow.classList.add('message__window--hidden');
+}
+
+function showRequest() {
+   request.classList.remove('message--hidden');
+   requestWindow.classList.remove('message__window--hidden');
+}
+
+function hideRequest() {
+   request.classList.add('message--hidden');
+   requestWindow.classList.add('message__window--hidden');
 }
 
 const legalMoves = new Map();
@@ -944,6 +959,7 @@ socket.on('checked', () => {
 //INITIALIZE GAME
 
 socket.on('game ready', roomInfo => {
+   roomData = roomInfo;
    hideLoader();
    cover.classList.add('cover--hidden');
 
@@ -995,7 +1011,8 @@ socket.on('game over', message => {
    clearInterval(timer);
 });
 
-function reset() {
+function setToInitial() {
+   hideLoader();
    hideResult();
    grid.innerHTML = '';
    capturedSelf.innerHTML = '';
@@ -1007,6 +1024,10 @@ function reset() {
    peacesLoaded = 0;
    turn = 'w';
    inCheck = false;
+}
+
+function reset() {
+   setToInitial();
    cover.classList.remove('cover--hidden');
 }
 
@@ -1019,6 +1040,23 @@ socket.on('opponent left', reset);
 
 restart.addEventListener('click', () => {
    socket.emit('rematch', room);
-   hideResult();
+   reset();
    showLoader("Waiting for opponent's response");
+});
+
+socket.on('rematch request', () => {
+   hideResult();
+   showRequest();
+});
+
+decline.addEventListener('click', () => {
+   hideRequest();
+   reset();
+   socket.emit('leave', room);
+});
+
+accept.addEventListener('click', () => {
+   hideRequest();
+   setToInitial();
+   socket.emit('request accepted', room, roomData);
 });

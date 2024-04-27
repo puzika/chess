@@ -17,13 +17,23 @@
       <p class="loader__message"></p>
    </div>
 
-   <div class="result result--hidden">
-      <div class="result__window result__window--hidden">
-         <p class="result__message"></p>
+   <div class="message message--result message--hidden">
+      <div class="message__window message__window--result message__window--hidden">
+         <p class="message__text"></p>
          <p>Wanna play again?</p>
-         <div class="result__options">
-            <button class="result__btn result__btn--restart">Restart</button>
-            <button class="result__btn result__btn--leave">Leave</button>
+         <div class="message__options">
+            <button class="message__btn message__btn--restart">Restart</button>
+            <button class="message__btn message__btn--leave">Leave</button>
+         </div>
+      </div>
+   </div>
+
+   <div class="message message--request message--hidden">
+      <div class="message__window message__window--request message__window--hidden">
+         <p>Opponent asking for a rematch? Wanna play again?</p>
+         <div class="message__options">
+            <button class="message__btn message__btn--accept">Accept</button>
+            <button class="message__btn message__btn--decline">Decline</button>
          </div>
       </div>
    </div>

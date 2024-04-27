@@ -54,6 +54,8 @@ io.on('connection', socket => {
 
    socket.on('rematch', room => socket.to(room).emit('rematch request'));
 
+   socket.on('request accepted', (room, roomData) => io.in(room).emit('game ready', roomData));
+
    socket.on('disconnect', () => {
       console.log(`${socket.id} disconnected`);
    });

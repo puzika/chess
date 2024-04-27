@@ -222,7 +222,7 @@ body {
   cursor: pointer;
 }
 
-.result {
+.message {
   position: fixed;
   top: 0;
   left: 0;
@@ -232,11 +232,11 @@ body {
   z-index: 50;
   transition: all 0.2s;
 }
-.result--hidden {
+.message--hidden {
   visibility: hidden;
   opacity: 0;
 }
-.result__window {
+.message__window {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -253,17 +253,17 @@ body {
   padding: 2rem 1rem;
   transition: all 0.5s;
 }
-.result__window--hidden {
+.message__window--hidden {
   visibility: hidden;
   opacity: 0;
   transform: translate(-50%, -50%) scale(1.2);
 }
-.result__options {
+.message__options {
   display: flex;
   justify-content: center;
   gap: 2rem;
 }
-.result__btn {
+.message__btn {
   font-size: 2rem;
   border-radius: 0.5rem;
   padding: 1rem 2rem;
