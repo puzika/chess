@@ -17,6 +17,7 @@
    }
 
    &--join,
+   &--name,
    &__link-box {
       display: flex;
       flex-direction: column;
@@ -36,7 +37,7 @@
       grid-column: 1 / -1;
    }
 
-   &__link {
+   &__input {
       font-size: inherit;
       padding: .2rem .5rem;
       border: var(--border-primary);

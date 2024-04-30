@@ -15,18 +15,18 @@ io.on('connection', socket => {
 
    io.to(socket.id).emit('connected');
 
-   socket.on('create room', (room, type, col) => {
+   socket.on('create room', (room, type, name) => {
       socket.join(room);
 
-      rooms.set(room, { players: [socket.id], type });
+      rooms.set(room, { players: [name], type });
    });
 
-   socket.on('join request', room => {
+   socket.on('join request', (room, name) => {
       let accessGranted = true;
 
       if (rooms.has(room) && rooms.get(room).players.length < 2) {
          socket.join(room);
-         rooms.get(room).players.push(socket.id);
+         rooms.get(room).players.push(name);
          io.in(room).emit('game ready', rooms.get(room));
       } else {
          accessGranted = false;

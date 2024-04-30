@@ -5,10 +5,11 @@ const grid = document.querySelector('.board');
 const loader = document.querySelector('.loader');
 const loaderMessage = document.querySelector('.loader__message');
 const cover = document.querySelector('.cover');
+const playerName = document.querySelector('.form__input--name');
 const createForm = document.querySelector('.form--create');
 const joinForm = document.querySelector('.form--join');
-const createLink = document.querySelector('.form__link--create');
-const joinLink = document.querySelector('.form__link--join');
+const createLink = document.querySelector('.form__input--create');
+const joinLink = document.querySelector('.form__input--join');
 const types = [...document.querySelectorAll('.form__type')];
 const timerSelf = document.querySelector('.info__time--self');
 const timerOpponent = document.querySelector('.info__time--opponent');
@@ -41,6 +42,7 @@ let timer;
 let inCheck = false;
 let peacesLoaded = 0;
 let roomData;
+
 
 ////////////////////////////////////////////////////////
 ///RULES
@@ -478,13 +480,23 @@ window.addEventListener('resize', () => {
 createForm.addEventListener('submit', e => {
    e.preventDefault();
 
+   const name = playerName.value;
+
+   if (!name) {
+      alert('Please enter your name');
+      return;
+   }
+
+   colorSelf = 'w';
+   colorOpponent = 'b';
+
    const selected = types.find(type => type.checked);
    const type = selected.value;
    room = createLink.value;
 
    navigator.clipboard.writeText(room);
 
-   socket.emit('create room', room, type);
+   socket.emit('create room', room, type, name);
 
    showLoader('waiting for the opponent');
 });
@@ -492,9 +504,19 @@ createForm.addEventListener('submit', e => {
 joinForm.addEventListener('submit', e => {
    e.preventDefault();
 
+   const name = playerName.value;
+
+   if (!name) {
+      alert('Please enter your name');
+      return
+   }
+
+   colorSelf = 'b';
+   colorOpponent = 'w';
+
    room = joinLink.value;
 
-   socket.emit('join request', room);
+   socket.emit('join request', room, name);
 
    showLoader('joining...');
 })
@@ -967,11 +989,9 @@ socket.on('game ready', roomInfo => {
    timeOpponent = timeSelf;
 
    let [playerName1, playerName2] = roomInfo.players;
-   [colorSelf, colorOpponent] = ['w', 'b'];
 
-   if (playerName1 !== socket.id) {
-      [playerName1, playerName2] = [playerName2, playerName1];
-      [colorSelf, colorOpponent] = [colorOpponent, colorSelf];
+   if (colorSelf === 'b') {
+      [playerName1, playerName2] = [playerName2, playerName1]
    }
 
    nameSelf.textContent = playerName1;

@@ -40,6 +40,10 @@
 
    <main class="game">
       <div class="cover">
+         <div class="form form--name">
+            <label for="" class="form__label form__label--name">Name</label>
+            <input type="text" class="form__input form__input--name" maxlength="20">
+         </div>
          <form action="" class="form form--create">
             <h3 class="form__heading form__heading--create">Create a game</h3>
             <input type="radio" name="game type" id="bullet" class="form__type" value="1">
@@ -53,7 +57,7 @@
 
             <div class="form__link-box">
                <label for="link-create" class="form__label form__label--create-game">Invite a friend</label>
-               <input id="link-create" type="text" class="form__link form__link--create" readonly>
+               <input id="link-create" type="text" class="form__input form__input--create" readonly>
                <p style="font-size: 1.6rem; color: gray;">room id is automatically saved to clipboard upon creation</p>
                <button class="form__submit form__submit--create">Create</button>
             </div>
@@ -63,7 +67,7 @@
 
          <form action="" class="form form--join">
             <label for="link-join" class="label label--create-game">Join game</label>
-            <input id="link-join" type="text" class="form__link form__link--join">
+            <input id="link-join" type="text" class="form__input form__input--join">
             <button class="form__submit form__submit--join">Join</button>
          </form>
       </div>
