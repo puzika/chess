@@ -73,10 +73,10 @@ body {
   justify-content: center;
   align-items: center;
 }
-.board__cell--white {
+.board__cell--w {
   background-color: var(--color-cell-white);
 }
-.board__cell--black {
+.board__cell--b {
   background-color: var(--color-cell-black);
 }
 .board__cell--hovered {

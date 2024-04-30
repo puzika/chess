@@ -433,10 +433,10 @@ function initializeBoard() {
 
    for (let i = 0; i < rows; i++) {
       for (let j = 0; j < cols; j++) {
-         const color = (i % 2 === 0 && j % 2 === 0) || (i % 2 !== 0 && j % 2 !== 0) ? 'white' : 'black';
+         const color = (i % 2 === 0 && j % 2 === 0) || (i % 2 !== 0 && j % 2 !== 0) ? 'w' : 'b';
          const piece = board[i][j] ?
             `<img draggable="${(colorSelf === 'w' && board[i][j][0] === 'w') ? "true" : "false"}" 
-                  class="board__piece"
+                  class="board__piece board__piece--${board[i][j][0]}"
                   data-color="${board[i][j][0]}"
                   data-name="${board[i][j][1]}"
                   data-piece="${board[i][j]}"
@@ -636,6 +636,7 @@ function showPromotion(cell) {
 let currentPiece = null;
 
 function dragStart() {
+   removeHints();
    currentPiece = this;
    const cell = currentPiece.parentElement;
    const rowOrigin = +cell.dataset.row;
@@ -687,7 +688,7 @@ function drop() {
 
    //DISABLE DRAG
 
-   const pieces = document.querySelectorAll('.board__piece');
+   const pieces = document.querySelectorAll(`.board__piece--${colorSelf}`);
    pieces.forEach(piece => {
       if (piece.dataset.color === colorSelf) {
          piece.setAttribute("draggable", "false");
@@ -866,7 +867,7 @@ socket.on('move opponent', (coords, pieceName) => {
    } else {
       //ENABLE DRAG
 
-      const pieces = document.querySelectorAll('.board__piece');
+      const pieces = document.querySelectorAll(`.board__piece--${colorSelf}`);
 
       pieces.forEach(piece => {
          if (piece.dataset.color === colorSelf) {
@@ -905,7 +906,7 @@ socket.on('promoting', col => {
       const markup = `
          <img draggable="false"
             alt="${piece}"
-            class="board__piece"
+            class="board__piece board__piece--${colorSelf}"
             data-color="${piece[0]}"
             data-name="${piece[1]}"
             data-piece="${piece}"
@@ -919,6 +920,7 @@ socket.on('promoting', col => {
       cell.insertAdjacentHTML('beforeend', markup);
 
       cell.firstElementChild.addEventListener('dragstart', dragStart);
+      cell.firstElementChild.addEventListener('click', dragStart);
 
       turn = colorOpponent;
       setTimer();
@@ -938,7 +940,7 @@ socket.on('promoted', (piece, col) => {
    const markup = `
          <img draggable="false"
             alt="${piece}"
-            class="board__piece"
+            class="board__piece board__piece--${colorOpponent}"
             data-color="${piece[0]}"
             data-name="${piece[1]}"
             data-piece="${piece}"
@@ -951,7 +953,7 @@ socket.on('promoted', (piece, col) => {
 
    //ENABLE DRAG
 
-   const pieces = document.querySelectorAll('.board__piece');
+   const pieces = document.querySelectorAll(`.board__piece--${colorSelf}`);
 
    pieces.forEach(piece => {
       if (piece.dataset.color === colorSelf) {
@@ -1010,10 +1012,13 @@ socket.on('game ready', roomInfo => {
    //INITIALIZE DRAG AND DROP
 
    const cells = document.querySelectorAll('.board__cell');
-   const pieces = document.querySelectorAll('.board__piece');
+   const pieces = document.querySelectorAll(`.board__piece--${colorSelf}`);
+
+   console.log(pieces);
 
    for (const piece of pieces) {
       piece.addEventListener('dragstart', dragStart);
+      piece.addEventListener('click', dragStart);
    }
 
    for (const cell of cells) {
@@ -1021,6 +1026,12 @@ socket.on('game ready', roomInfo => {
       cell.addEventListener('dragenter', dragEnter);
       cell.addEventListener('dragleave', dragLeave);
       cell.addEventListener('drop', drop);
+      cell.addEventListener('click', function () {
+         console.log(currentPiece);
+         if (cell === currentPiece.parentElement) return;
+
+         drop.call(this);
+      });
    }
 
    if (colorSelf === turn) getValidMoves();
