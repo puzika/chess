@@ -1,9 +1,29 @@
 .captured {
    width: 100%;
-   height: 2rem;
+   height: 5rem;
    display: flex;
+
+   @include respond(tablet-big) {
+      height: 4rem;
+   }
+
+   @include respond(tablet) {
+      height: 3rem;
+   }
 
    &__piece {
       height: 100%;
+
+      &:not(:first-child) {
+         margin-left: -1.5rem;
+
+         @include respond(tablet-big) {
+            margin-left: -1rem;
+         }
+
+         @include respond(tablet) {
+            margin-left: -.5rem;
+         }
+      }
    }
 }

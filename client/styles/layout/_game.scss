@@ -2,4 +2,12 @@
    position: relative;
    margin: 0 auto;
    max-width: 40%;
+
+   @include respond(tablet-small) {
+      max-width: 50%;
+   }
+
+   @include respond(phone-big) {
+      max-width: 60%;
+   }
 }
